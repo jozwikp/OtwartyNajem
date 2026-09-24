@@ -152,3 +152,15 @@ test('the history page shows who changed what', function () {
         ->assertSee('Kraków')
         ->assertSee('Wrocław');
 });
+
+test('the sidebar lists the user\'s apartments', function () {
+    $user = User::factory()->create();
+    Apartment::factory()->ownedBy($user)->create(['label' => 'Kawalerka Mokotów']);
+    Apartment::factory()->ownedBy(User::factory()->create())->create(['label' => 'Cudze M3']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Kawalerka Mokotów')
+        ->assertDontSee('Cudze M3');
+});

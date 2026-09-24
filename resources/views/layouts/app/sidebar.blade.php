@@ -3,8 +3,14 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-paper text-ink">
+        @php
+            $sidebarLimit = 12;
+            $sidebarApartments = auth()->user()->apartments()->orderBy('label')->limit($sidebarLimit + 1)->get(['apartments.id', 'apartments.label']);
+            $currentApartmentId = optional(request()->route('apartment'))->id;
+        @endphp
+
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-line bg-rail">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -15,24 +21,61 @@
                     {{ __('Pulpit') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="building-office-2" :href="route('apartments.index')" :current="request()->routeIs('apartments.*')" wire:navigate>
-                    {{ __('Moje mieszkania') }}
+                <flux:sidebar.item icon="building-office-2" :href="route('apartments.index')" :current="request()->routeIs('apartments.index')" wire:navigate>
+                    {{ __('Wszystkie mieszkania') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
+
+            <flux:sidebar.group :heading="__('Moje mieszkania')" class="grid">
+                @foreach ($sidebarApartments->take($sidebarLimit) as $sidebarApartment)
+                    @php $isCurrentApartment = $currentApartmentId === $sidebarApartment->id; @endphp
+                    <a
+                        href="{{ route('apartments.show', $sidebarApartment) }}"
+                        wire:navigate
+                        title="{{ $sidebarApartment->label }}"
+                        @if ($isCurrentApartment) aria-current="page" @endif
+                        @class([
+                            'my-px flex h-9 items-center gap-2.5 rounded-lg px-2 text-sm transition',
+                            'bg-card font-medium text-ink shadow-xs ring-1 ring-line' => $isCurrentApartment,
+                            'text-stone-600 hover:bg-stone-800/5 hover:text-ink dark:text-stone-300 dark:hover:bg-white/5' => ! $isCurrentApartment,
+                        ])
+                    >
+                        <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-badge">
+                            <flux:icon.home-modern variant="micro" class="text-accent-content" />
+                        </span>
+                        <span class="truncate">{{ $sidebarApartment->label }}</span>
+                    </a>
+                @endforeach
+
+                @if ($sidebarApartments->count() > $sidebarLimit)
+                    <a href="{{ route('apartments.index') }}" wire:navigate class="my-px flex h-8 items-center px-2 text-sm text-accent-content hover:underline">
+                        {{ __('Pokaż wszystkie') }} →
+                    </a>
+                @endif
+
+                <a
+                    href="{{ route('apartments.create') }}"
+                    wire:navigate
+                    @class([
+                        'my-px flex h-9 items-center gap-2.5 rounded-lg px-2 text-sm transition',
+                        'bg-card font-medium text-ink ring-1 ring-line' => request()->routeIs('apartments.create'),
+                        'text-stone-500 hover:bg-stone-800/5 hover:text-ink dark:text-stone-400 dark:hover:bg-white/5' => ! request()->routeIs('apartments.create'),
+                    ])
+                >
+                    <span class="flex size-6 shrink-0 items-center justify-center rounded-md border border-dashed border-stone-300 dark:border-stone-600">
+                        <flux:icon.plus variant="micro" />
+                    </span>
+                    {{ __('Dodaj mieszkanie') }}
+                </a>
+            </flux:sidebar.group>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="plus" :href="route('apartments.create')" wire:navigate>
-                    {{ __('Dodaj mieszkanie') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
+        <flux:header class="border-b border-line bg-rail lg:hidden">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />

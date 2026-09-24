@@ -2,8 +2,8 @@
 @php $presenter = new \App\Support\ActivityPresenter($activity); @endphp
 
 <li class="relative flex gap-4 pb-6 last:pb-0" wire:key="activity-{{ $activity->id }}">
-    <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-        <flux:icon :name="$presenter->icon()" variant="mini" class="text-zinc-600 dark:text-zinc-300" />
+    <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-badge">
+        <flux:icon :name="$presenter->icon()" variant="mini" class="text-accent-content" />
     </div>
 
     <div class="min-w-0 flex-1 pt-1">
@@ -21,12 +21,12 @@
         </flux:text>
 
         @if ($changes = $presenter->changes())
-            <ul class="mt-2 space-y-1 rounded-lg bg-zinc-50 p-3 text-sm dark:bg-zinc-800/60">
+            <ul class="mt-2 space-y-1 rounded-lg border border-line bg-tray p-3 text-sm">
                 @foreach ($changes as $change)
                     <li>
-                        <span class="text-zinc-500 dark:text-zinc-400">{{ $change['label'] }}:</span>
-                        <span class="line-through decoration-zinc-400">{{ $change['old'] }}</span>
-                        <span class="text-zinc-400">→</span>
+                        <span class="text-stone-500 dark:text-stone-400">{{ $change['label'] }}:</span>
+                        <span class="line-through decoration-stone-400">{{ $change['old'] }}</span>
+                        <span class="text-stone-400">→</span>
                         <span class="font-medium">{{ $change['new'] }}</span>
                     </li>
                 @endforeach

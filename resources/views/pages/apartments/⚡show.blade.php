@@ -13,8 +13,10 @@ new #[Title('Mieszkanie')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto w-full max-w-5xl">
+<div>
     @include('partials.apartment.header', ['current' => 'apartments.show'])
+
+    <div class="mx-auto w-full max-w-5xl">
 
     <div class="grid gap-6 lg:grid-cols-3">
         <flux:card class="lg:col-span-2">
@@ -25,7 +27,7 @@ new #[Title('Mieszkanie')] class extends Component {
                 </flux:button>
             </div>
 
-            <dl class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <dl class="divide-y divide-line">
                 @foreach ([
                     __('Ulica i numer budynku') => $apartment->street,
                     __('Numer lokalu') => $apartment->unit_number ?? __('— (cały budynek)'),
@@ -36,7 +38,7 @@ new #[Title('Mieszkanie')] class extends Component {
                     __('Nazwa na liście') => $apartment->label,
                 ] as $term => $value)
                     <div class="grid gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                        <dt class="text-sm text-zinc-500 dark:text-zinc-400">{{ $term }}</dt>
+                        <dt class="text-sm text-stone-500 dark:text-stone-400">{{ $term }}</dt>
                         <dd class="font-medium sm:col-span-2">{{ $value }}</dd>
                     </div>
                 @endforeach
@@ -58,10 +60,10 @@ new #[Title('Mieszkanie')] class extends Component {
                                 <div class="truncate text-sm font-medium">
                                     {{ $owner->name }}
                                     @if ($owner->is(auth()->user()))
-                                        <span class="text-zinc-500">({{ __('Ty') }})</span>
+                                        <span class="text-stone-500">({{ __('Ty') }})</span>
                                     @endif
                                 </div>
-                                <div class="truncate text-xs text-zinc-500">{{ $owner->email }}</div>
+                                <div class="truncate text-xs text-stone-500">{{ $owner->email }}</div>
                             </div>
                         </li>
                     @endforeach
@@ -77,5 +79,6 @@ new #[Title('Mieszkanie')] class extends Component {
                 <flux:link :href="route('apartments.history', $apartment)" wire:navigate>{{ __('Zobacz historię zmian') }}</flux:link>
             </flux:text>
         </div>
+    </div>
     </div>
 </div>

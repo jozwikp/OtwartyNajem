@@ -47,9 +47,9 @@ new #[Title('Pulpit')] class extends Component {
     <flux:text class="mt-1 text-base">{{ __('Oto krótkie podsumowanie Twoich mieszkań.') }}</flux:text>
 
     @if ($this->apartmentsCount === 0)
-        <div class="mt-8 flex flex-col items-center rounded-2xl border-2 border-dashed border-zinc-200 px-6 py-16 text-center dark:border-zinc-700">
-            <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                <flux:icon.home-modern class="size-8 text-zinc-500" />
+        <div class="mt-8 flex flex-col items-center rounded-2xl border-2 border-dashed border-stone-300 bg-tray px-6 py-16 text-center dark:border-stone-700">
+            <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-badge">
+                <flux:icon.home-modern class="size-8 text-accent-content" />
             </div>
             <flux:heading size="lg">{{ __('Zacznij od dodania mieszkania') }}</flux:heading>
             <flux:text class="mt-2 max-w-md text-base">{{ __('Wystarczy adres i metraż. Później możesz zaprosić współwłaścicieli.') }}</flux:text>
@@ -59,15 +59,15 @@ new #[Title('Pulpit')] class extends Component {
         </div>
     @else
         <div class="mt-8 grid gap-4 sm:grid-cols-3">
-            <a href="{{ route('apartments.index') }}" wire:navigate class="rounded-2xl border border-zinc-200 p-5 transition hover:shadow-md dark:border-zinc-700">
+            <a href="{{ route('apartments.index') }}" wire:navigate class="rounded-2xl border border-line bg-card p-5 transition hover:border-accent/40 hover:shadow-md">
                 <flux:text>{{ __('Mieszkania') }}</flux:text>
                 <div class="mt-1 text-3xl font-semibold">{{ $this->apartmentsCount }}</div>
             </a>
-            <div class="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700">
+            <div class="rounded-2xl border border-line bg-card p-5">
                 <flux:text>{{ __('Łączny metraż') }}</flux:text>
                 <div class="mt-1 text-3xl font-semibold">{{ $this->totalArea }}</div>
             </div>
-            <a href="{{ route('apartments.create') }}" wire:navigate class="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-zinc-200 p-5 font-medium text-zinc-600 transition hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-white">
+            <a href="{{ route('apartments.create') }}" wire:navigate class="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-stone-300 p-5 font-medium text-accent-content transition hover:border-accent hover:bg-card dark:border-stone-700">
                 <flux:icon.plus variant="mini" />
                 {{ __('Dodaj mieszkanie') }}
             </a>

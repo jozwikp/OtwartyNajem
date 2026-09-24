@@ -6,7 +6,7 @@
             <span @class([
                 'flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
                 'bg-accent text-accent-foreground' => $number <= $current,
-                'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' => $number > $current,
+                'border border-line bg-card text-stone-500 dark:text-stone-400' => $number > $current,
             ])>
                 @if ($number < $current)
                     <flux:icon.check variant="micro" />
@@ -16,11 +16,11 @@
             </span>
             <span @class([
                 'hidden text-sm sm:inline',
-                'font-medium text-zinc-900 dark:text-white' => $number === $current,
-                'text-zinc-500 dark:text-zinc-400' => $number !== $current,
+                'font-medium text-ink' => $number === $current,
+                'text-stone-500 dark:text-stone-400' => $number !== $current,
             ])>{{ $label }}</span>
             @if (! $loop->last)
-                <span class="h-px flex-1 bg-zinc-200 dark:bg-zinc-700"></span>
+                <span class="h-px flex-1 bg-line"></span>
             @endif
         </li>
     @endforeach

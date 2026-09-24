@@ -79,7 +79,7 @@ new #[Layout('layouts::auth')] #[Title('Zaproszenie')] class extends Component {
             :description="__(':name zaprasza Cię do wspólnego zarządzania mieszkaniem.', ['name' => $invitation->inviter?->name ?? __('Właściciel')])"
         />
 
-        <div class="rounded-xl border border-zinc-200 p-4 text-center dark:border-zinc-700">
+        <div class="rounded-xl border border-line bg-badge/60 p-4 text-center">
             <div class="font-semibold">{{ $invitation->apartment->label }}</div>
             <flux:text class="text-sm">{{ $invitation->apartment->full_address }}</flux:text>
         </div>

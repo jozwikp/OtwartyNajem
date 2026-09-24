@@ -120,8 +120,10 @@ new #[Title('Właściciele')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto w-full max-w-5xl">
+<div>
     @include('partials.apartment.header', ['current' => 'apartments.owners'])
+
+    <div class="mx-auto w-full max-w-5xl">
 
     <div class="max-w-3xl space-y-8">
         <flux:callout icon="information-circle" color="zinc">
@@ -139,7 +141,7 @@ new #[Title('Właściciele')] class extends Component {
                 </flux:modal.trigger>
             </div>
 
-            <ul class="divide-y divide-zinc-200 rounded-2xl border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
+            <ul class="divide-y divide-line rounded-2xl border border-line bg-card">
                 @foreach ($this->owners as $owner)
                     @php $isMe = $owner->is(auth()->user()); @endphp
                     <li class="flex flex-wrap items-center gap-4 p-4" wire:key="owner-{{ $owner->id }}">
@@ -173,11 +175,11 @@ new #[Title('Właściciele')] class extends Component {
             <section>
                 <flux:heading size="lg" class="mb-4">{{ __('Wysłane zaproszenia') }}</flux:heading>
 
-                <ul class="divide-y divide-zinc-200 rounded-2xl border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
+                <ul class="divide-y divide-line rounded-2xl border border-line bg-card">
                     @foreach ($this->invitations as $invitation)
                         <li class="flex flex-wrap items-center gap-4 p-4" wire:key="invitation-{{ $invitation->id }}">
-                            <div class="flex size-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                                <flux:icon.envelope variant="mini" class="text-zinc-500" />
+                            <div class="flex size-10 items-center justify-center rounded-full bg-badge">
+                                <flux:icon.envelope variant="mini" class="text-accent-content" />
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-2 font-medium">
@@ -259,4 +261,5 @@ new #[Title('Właściciele')] class extends Component {
             </div>
         @endif
     </flux:modal>
+    </div>
 </div>

@@ -27,8 +27,10 @@ new #[Title('Historia zmian')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto w-full max-w-5xl">
+<div>
     @include('partials.apartment.header', ['current' => 'apartments.history'])
+
+    <div class="mx-auto w-full max-w-5xl">
 
     <div class="max-w-3xl">
         <flux:text class="mb-6">{{ __('Tutaj widać wszystko, co działo się z tym mieszkaniem: kto i kiedy coś dodał, zmienił lub usunął.') }}</flux:text>
@@ -46,5 +48,6 @@ new #[Title('Historia zmian')] class extends Component {
                 {{ $this->activities->links() }}
             </div>
         @endif
+    </div>
     </div>
 </div>

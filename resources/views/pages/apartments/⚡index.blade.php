@@ -54,9 +54,9 @@ new #[Title('Moje mieszkania')] class extends Component {
     </div>
 
     @if ($this->total === 0)
-        <div class="flex flex-col items-center rounded-2xl border-2 border-dashed border-zinc-200 px-6 py-16 text-center dark:border-zinc-700">
-            <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                <flux:icon.home-modern class="size-8 text-zinc-500" />
+        <div class="flex flex-col items-center rounded-2xl border-2 border-dashed border-stone-300 bg-tray px-6 py-16 text-center dark:border-stone-700">
+            <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-badge">
+                <flux:icon.home-modern class="size-8 text-accent-content" />
             </div>
             <flux:heading size="lg">{{ __('Nie masz jeszcze żadnych mieszkań') }}</flux:heading>
             <flux:text class="mt-2 max-w-md text-base">
@@ -87,10 +87,10 @@ new #[Title('Moje mieszkania')] class extends Component {
                     href="{{ route('apartments.show', $apartment) }}"
                     wire:navigate
                     wire:key="apartment-{{ $apartment->id }}"
-                    class="group flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600"
+                    class="group flex flex-col rounded-2xl border border-line bg-card p-5 transition hover:border-accent/40 hover:shadow-md"
                 >
-                    <div class="mb-3 flex size-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-                        <flux:icon.home-modern variant="mini" class="text-zinc-600 dark:text-zinc-300" />
+                    <div class="mb-3 flex size-10 items-center justify-center rounded-xl bg-badge">
+                        <flux:icon.home-modern variant="mini" class="text-accent-content" />
                     </div>
 
                     <flux:heading size="lg" class="group-hover:underline">{{ $apartment->label }}</flux:heading>

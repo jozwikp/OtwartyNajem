@@ -72,7 +72,7 @@ new #[Title('Dodaj mieszkanie')] class extends Component {
 
     @include('partials.steps', ['steps' => [__('Adres'), __('Szczegóły'), __('Podsumowanie')], 'current' => $step])
 
-    <flux:card class="p-6 sm:p-8">
+    <flux:card class="bg-tray p-6 sm:p-8">
         @if ($step === 1)
             <form wire:submit="next" wire:key="step-1">
                 <flux:heading size="lg">{{ __('Gdzie jest mieszkanie?') }}</flux:heading>
@@ -102,7 +102,7 @@ new #[Title('Dodaj mieszkanie')] class extends Component {
                 <flux:heading size="lg">{{ __('Sprawdź, czy wszystko się zgadza') }}</flux:heading>
                 <flux:text class="mb-6 mt-1">{{ __('Jeśli coś trzeba poprawić, kliknij „Zmień”.') }}</flux:text>
 
-                <div class="divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
+                <div class="divide-y divide-line rounded-xl border border-line bg-card">
                     <div class="flex items-start justify-between gap-4 p-4">
                         <div>
                             <flux:text class="text-sm">{{ __('Adres') }}</flux:text>

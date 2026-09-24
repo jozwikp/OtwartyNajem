@@ -45,16 +45,18 @@ new #[Title('Edytuj mieszkanie')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto w-full max-w-5xl">
+<div>
     @include('partials.apartment.header', ['current' => 'apartments.show'])
 
+    <div class="mx-auto w-full max-w-5xl">
+
     <form wire:submit="save" class="max-w-2xl space-y-6">
-        <flux:card class="p-6 sm:p-8">
+        <flux:card class="bg-tray p-6 sm:p-8">
             <flux:heading size="lg" class="mb-6">{{ __('Adres') }}</flux:heading>
             @include('partials.apartment.address-fields')
         </flux:card>
 
-        <flux:card class="p-6 sm:p-8">
+        <flux:card class="bg-tray p-6 sm:p-8">
             <flux:heading size="lg" class="mb-6">{{ __('Szczegóły') }}</flux:heading>
             @include('partials.apartment.details-fields')
         </flux:card>
@@ -65,7 +67,7 @@ new #[Title('Edytuj mieszkanie')] class extends Component {
         </div>
     </form>
 
-    <div class="mt-12 max-w-2xl rounded-2xl border border-red-200 p-6 dark:border-red-900/60">
+    <div class="mt-12 max-w-2xl rounded-2xl border border-red-200 bg-card p-6 dark:border-red-900/60">
         <flux:heading>{{ __('Usuń mieszkanie') }}</flux:heading>
         <flux:text class="mt-1">{{ __('Mieszkanie zniknie z listy u Ciebie i u pozostałych właścicieli.') }}</flux:text>
 
@@ -91,4 +93,5 @@ new #[Title('Edytuj mieszkanie')] class extends Component {
             </div>
         </div>
     </flux:modal>
+    </div>
 </div>
