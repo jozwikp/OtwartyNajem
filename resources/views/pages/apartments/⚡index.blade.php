@@ -94,8 +94,6 @@ new #[Title('Moje mieszkania')] class extends Component {
                     </div>
 
                     <flux:heading size="lg" class="group-hover:underline">{{ $apartment->label }}</flux:heading>
-                    <flux:text class="mt-1">{{ $apartment->address_line }}</flux:text>
-                    <flux:text>{{ $apartment->postal_code }} {{ $apartment->city }}</flux:text>
 
                     <div class="mt-auto flex items-center justify-between pt-4">
                         <flux:badge size="sm">{{ $apartment->area_formatted }}</flux:badge>
