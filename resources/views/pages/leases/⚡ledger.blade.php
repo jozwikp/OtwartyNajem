@@ -1,7 +1,7 @@
 <?php
 
 use App\Actions\Leases\AccrueRecurringCharges;
-use App\Actions\Leases\DeleteBill;
+use App\Actions\Bills\DeleteBill;
 use App\Actions\Leases\RecordPayment;
 use App\Enums\PaymentMethod;
 use App\Livewire\Forms\LeaseForm;
@@ -190,7 +190,7 @@ new #[Title('Rozliczenia')] class extends Component {
 
                 <div class="flex flex-row gap-2 md:flex-col md:justify-center">
                     <flux:button variant="primary" icon="banknotes" wire:click="openPayment" class="flex-1">{{ __('Zapisz wpłatę') }}</flux:button>
-                    <flux:button icon="document-plus" :href="route('bills.create', [$apartment, $lease])" wire:navigate class="flex-1">{{ __('Dodaj rachunek') }}</flux:button>
+                    <flux:button icon="document-plus" :href="route('bills.index')" wire:navigate class="flex-1">{{ __('Wgraj rachunki') }}</flux:button>
                 </div>
             </div>
 
@@ -236,7 +236,8 @@ new #[Title('Rozliczenia')] class extends Component {
                                             <flux:text class="text-xs">
                                                 @if ($charge->due_on) {{ __('termin: :date', ['date' => $charge->due_on->format('d.m.Y')]) }} @endif
                                                 @if ($bill)
-                                                    · <flux:link :href="route('bills.file', [$apartment, $bill])" target="_blank" class="text-xs">{{ __('faktura') }}</flux:link>
+                                                    · <flux:link :href="route('bills.file', $bill)" target="_blank" class="text-xs">{{ __('faktura') }}</flux:link>
+                                                    · <flux:link :href="route('bills.edit', $bill)" wire:navigate class="text-xs">{{ __('edytuj') }}</flux:link>
                                                     @if ($bill->isPartial())
                                                         · {{ __('najemca płaci :part z :total', ['part' => $fmt($bill->tenant_amount), 'total' => $fmt($bill->total_amount)]) }}
                                                     @endif

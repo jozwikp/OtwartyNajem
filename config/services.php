@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+        'model' => env('OPENROUTER_MODEL', 'openai/gpt-5-nano'),
+        'url' => env('OPENROUTER_URL', 'https://openrouter.ai/api/v1'),
+        'timeout' => (int) env('OPENROUTER_TIMEOUT', 180),
+    ],
+
 ];

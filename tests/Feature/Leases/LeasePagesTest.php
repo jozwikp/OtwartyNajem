@@ -3,14 +3,12 @@
 use App\Actions\Leases\CreateLease;
 use App\Enums\ChargeType;
 use App\Models\Apartment;
-use App\Models\Bill;
 use App\Models\Lease;
 use App\Models\LedgerEntry;
 use App\Models\User;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -160,46 +158,11 @@ test('payments can be recorded and deleted on the ledger page', function () {
     expect($lease->balance())->toBe(250000);
 });
 
-test('a bill is added in steps and charged to the tenant', function () {
-    Storage::fake('local');
-    $lease = makeLease();
-
-    Livewire::test('pages::bills.create', ['apartment' => $this->apartment, 'lease' => $lease])
-        ->call('next')
-        ->assertHasErrors('invoice')
-        ->set('invoice', UploadedFile::fake()->create('faktura.pdf', 200, 'application/pdf'))
-        ->call('next')
-        ->assertHasNoErrors()
-        ->set('category', 'electricity')
-        ->set('supplier', 'Tauron')
-        ->call('next')
-        ->set('totalAmount', '312,40')
-        ->set('periodFrom', '2026-08-01')
-        ->set('periodTo', '2026-08-31')
-        ->set('partial', true)
-        ->set('tenantAmount', '200')
-        ->call('next')
-        ->assertHasNoErrors()
-        ->assertSet('step', 4)
-        ->call('save')
-        ->assertRedirect(route('leases.ledger', [$this->apartment, $lease]));
-
-    $bill = Bill::sole();
-
-    expect($bill->total_amount)->toBe(31240)
-        ->and($bill->tenant_amount)->toBe(20000)
-        ->and($bill->currency)->toBe('PLN')
-        ->and($bill->ledgerEntry->amount)->toBe(20000);
-
-    Storage::disk('local')->assertExists($bill->file_path);
-
-    $this->get(route('bills.file', [$this->apartment, $bill]))->assertOk();
-});
-
 test('other users cannot see leases, ledgers or invoices', function () {
     Storage::fake('local');
     $lease = makeLease();
     $bill = $lease->bills()->create([
+        'status' => 'approved',
         'category' => 'water', 'issued_on' => '2026-09-01', 'period_from' => '2026-08-01', 'period_to' => '2026-08-31',
         'currency' => 'PLN', 'total_amount' => 100, 'tenant_amount' => 100, 'due_on' => '2026-09-15',
         'file_path' => 'bills/x.pdf', 'file_name' => 'x.pdf',
@@ -209,7 +172,10 @@ test('other users cannot see leases, ledgers or invoices', function () {
 
     $this->get(route('leases.current', $this->apartment))->assertForbidden();
     $this->get(route('leases.ledger', [$this->apartment, $lease]))->assertForbidden();
-    $this->get(route('bills.file', [$this->apartment, $bill]))->assertForbidden();
+    $bill->forceFill(['apartment_id' => $this->apartment->id])->save();
+
+    $this->get(route('bills.file', $bill))->assertForbidden();
+    $this->get(route('bills.edit', $bill))->assertForbidden();
 });
 
 test('a lease cannot be opened through another apartment', function () {

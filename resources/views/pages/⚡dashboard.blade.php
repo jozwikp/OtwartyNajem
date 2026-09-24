@@ -49,6 +49,15 @@ new #[Title('Pulpit')] class extends Component {
     <flux:heading size="xl" level="1">{{ __('Dzień dobry, :name!', ['name' => $this->firstName()]) }}</flux:heading>
     <flux:text class="mt-1 text-base">{{ __('Oto krótkie podsumowanie Twoich mieszkań.') }}</flux:text>
 
+    @php $billsToReview = \App\Models\Bill::visibleTo(auth()->user())->whereIn('status', ['review', 'failed'])->count(); @endphp
+    @if ($billsToReview > 0)
+        <a href="{{ route('bills.index') }}" wire:navigate class="mt-6 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 font-medium text-amber-900 transition hover:shadow-md dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+            <flux:icon.receipt-percent />
+            <span class="flex-1">{{ trans_choice(':count rachunek czeka na sprawdzenie|:count rachunki czekają na sprawdzenie|:count rachunków czeka na sprawdzenie', $billsToReview) }}</span>
+            <flux:icon.arrow-right variant="mini" />
+        </a>
+    @endif
+
     @if ($this->apartmentsCount === 0)
         <div class="mt-8 flex flex-col items-center rounded-2xl border-2 border-dashed border-stone-300 bg-tray px-6 py-16 text-center dark:border-stone-700">
             <div class="mb-4 flex size-16 items-center justify-center rounded-full bg-badge">

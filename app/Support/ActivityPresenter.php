@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Enums\BillCategory;
+use App\Enums\BillStatus;
 use App\Enums\ChargeType;
 use App\Enums\PaymentMethod;
 use App\Models\Apartment;
@@ -39,7 +40,7 @@ class ActivityPresenter
             'leases' => $this->activity->event === 'created' ? 'key' : 'document-text',
             'lease_tenants' => 'user',
             'recurring_charges', 'recurring_charge_rates' => 'calendar-days',
-            'bills' => 'receipt-percent',
+            'bills' => $this->activity->event === 'ai_read' ? 'sparkles' : 'receipt-percent',
             'ledger_entries' => $this->attribute('kind') === 'payment' ? 'banknotes' : 'calculator',
             default => match ($this->activity->event) {
                 'created' => 'plus-circle',
@@ -92,7 +93,17 @@ class ActivityPresenter
                 'category' => $this->formatValue('category', $this->attribute('category')),
                 'amount' => $this->formatValue('tenant_amount', $this->attribute('tenant_amount')),
             ]),
-            'bills.updated' => __('Zmieniono rachunek'),
+            'bills.ai_read' => __('Odczytano automatycznie rachunek: :category, :amount (:file)', [
+                'category' => $this->formatValue('category', $this->activity->getProperty('category')),
+                'amount' => $this->formatValue('total_amount', $this->activity->getProperty('amount')),
+                'file' => $this->activity->getProperty('file_name'),
+            ]),
+            'bills.updated' => ($this->activity->attribute_changes?->get('attributes')['status'] ?? null) === 'approved'
+                ? __('Zatwierdzono rachunek: :category, :amount', [
+                    'category' => $this->formatValue('category', $this->subjectValue('category')),
+                    'amount' => $this->formatValue('tenant_amount', $this->subjectValue('tenant_amount')),
+                ])
+                : __('Poprawiono rachunek'),
             'bills.deleted' => __('Usunięto rachunek: :category', ['category' => $this->formatValue('category', $this->attribute('category'))]),
 
             'ledger_entries.created' => $this->attribute('kind') === 'payment'
@@ -200,6 +211,16 @@ class ActivityPresenter
         };
     }
 
+    /**
+     * Current value on the subject (for events that only logged the changed fields).
+     */
+    protected function subjectValue(string $key): mixed
+    {
+        $value = $this->activity->subject?->getAttribute($key) ?? $this->attribute($key);
+
+        return $value instanceof \BackedEnum ? $value->value : $value;
+    }
+
     protected function tenantName(): string
     {
         $subject = $this->activity->subject;
@@ -247,6 +268,8 @@ class ActivityPresenter
             in_array($attribute, ['deposit_method', 'payment_method'], true) => PaymentMethod::tryFrom($value)?->label() ?? (string) $value,
             $attribute === 'bank_account' => BankAccount::format($value),
             $attribute === 'is_primary' => $value ? __('tak') : __('nie'),
+            $attribute === 'apartment_id' => Apartment::withTrashed()->find($value)?->label ?? (string) $value,
+            $attribute === 'status' => BillStatus::tryFrom($value)?->label() ?? (string) $value,
             default => (string) $value,
         };
     }

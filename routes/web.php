@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Apartment;
 use App\Models\Bill;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -9,6 +8,12 @@ Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth'])->group(function () {
     Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
+
+    Route::livewire('rachunki', 'pages::bills.index')->name('bills.index');
+    Route::livewire('rachunki/{bill}', 'pages::bills.edit')->middleware('can:update,bill')->name('bills.edit');
+    Route::get('rachunki/{bill}/plik', function (Bill $bill) {
+        return Storage::disk('local')->response($bill->file_path, $bill->file_name);
+    })->middleware('can:view,bill')->name('bills.file');
 
     Route::livewire('mieszkania', 'pages::apartments.index')->name('apartments.index');
     Route::livewire('mieszkania/dodaj', 'pages::apartments.create')->name('apartments.create');
@@ -27,11 +32,6 @@ Route::middleware(['auth'])->group(function () {
             Route::livewire('najmy/{lease}', 'pages::leases.show')->name('leases.show');
             Route::livewire('najmy/{lease}/edytuj', 'pages::leases.edit')->name('leases.edit');
             Route::livewire('najmy/{lease}/rozliczenia', 'pages::leases.ledger')->name('leases.ledger');
-            Route::livewire('najmy/{lease}/rachunki/dodaj', 'pages::bills.create')->name('bills.create');
-
-            Route::get('rachunki/{bill}/plik', function (Apartment $apartment, Bill $bill) {
-                return Storage::disk('local')->response($bill->file_path, $bill->file_name);
-            })->name('bills.file');
         });
     });
 });
