@@ -18,10 +18,7 @@
         <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-badge">
             <flux:icon.home-modern class="size-6 text-accent-content" />
         </div>
-        <div class="min-w-0">
-            <flux:heading size="xl" level="1">{{ $apartment->label }}</flux:heading>
-            <flux:text class="mt-1 text-base">{{ $apartment->full_address }}</flux:text>
-        </div>
+        <flux:heading size="xl" level="1" class="min-w-0">{{ $apartment->label }}</flux:heading>
     </div>
 
     <nav class="relative -mb-px mt-6 flex gap-1 overflow-x-auto overflow-y-hidden" aria-label="{{ __('Sekcje mieszkania') }}">
