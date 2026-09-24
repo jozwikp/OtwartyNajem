@@ -95,6 +95,26 @@ new #[Title('Najem')] class extends Component {
         return $options;
     }
 
+    // --- Notifications -------------------------------------------------------
+
+    #[Computed]
+    public function digest(): ?\App\Support\TenantDigest
+    {
+        return $this->lease ? new \App\Support\TenantDigest($this->lease) : null;
+    }
+
+    public function toggleNotifications(UpdateLease $updateLease): void
+    {
+        $this->authorize('update', $this->apartment);
+
+        $updateLease->handle($this->lease, ['notify_tenants' => ! $this->lease->notify_tenants]);
+
+        Flux::toast(text: $this->lease->notify_tenants
+            ? __('Powiadomienia włączone. Najemca dostanie wiadomość, gdy pojawią się nowe opłaty.')
+            : __('Powiadomienia wyłączone.'));
+        unset($this->lease, $this->digest);
+    }
+
     // --- Tenants -------------------------------------------------------------
 
     public function openTenant(?int $tenantId = null): void
@@ -487,6 +507,51 @@ new #[Title('Najem')] class extends Component {
                             </div>
                         @endif
                     @endif
+                </flux:card>
+
+                {{-- Notifications --}}
+                @php
+                    $digest = $this->digest;
+                    $emails = $lease->tenantEmails();
+                    $pendingCount = $digest->newCharges->count() + $digest->changedCharges->count();
+                @endphp
+                <flux:card class="lg:col-span-2">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <flux:heading size="lg">{{ __('Powiadomienia e-mail dla najemcy') }}</flux:heading>
+                                <flux:badge size="sm" :color="$lease->notify_tenants ? 'green' : 'zinc'">{{ $lease->notify_tenants ? __('włączone') : __('wyłączone') }}</flux:badge>
+                            </div>
+                            <flux:text class="mt-1 text-sm">{{ __('Jedna wiadomość dziennie po 16:00, tylko gdy są nowe opłaty, rachunki lub zmiany kwot. Bez załączników.') }}</flux:text>
+
+                            @if ($lease->notify_tenants)
+                                @if ($emails === [])
+                                    <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                                        {{ __('Najemca nie ma wpisanego adresu e-mail, więc nie dostanie powiadomień. Uzupełnij go w danych najemcy.') }}
+                                    </div>
+                                @else
+                                    <flux:text class="mt-3 text-sm">
+                                        {{ __('Odbiorcy: :emails', ['emails' => implode(', ', $emails)]) }}<br>
+                                        @if ($pendingCount > 0)
+                                            <strong>{{ trans_choice('Dziś po 16:00 wyślemy :count nową pozycję.|Dziś po 16:00 wyślemy :count nowe pozycje.|Dziś po 16:00 wyślemy :count nowych pozycji.', $pendingCount) }}</strong>
+                                        @else
+                                            {{ __('Nie ma nic nowego do wysłania.') }}
+                                        @endif
+                                        @if ($lease->last_notified_at)
+                                            {{ __('Ostatnia wiadomość: :date.', ['date' => $lease->last_notified_at->translatedFormat('j F Y, H:i')]) }}
+                                        @endif
+                                    </flux:text>
+                                @endif
+                            @endif
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @if ($lease->notify_tenants && $emails !== [])
+                                <flux:button size="sm" icon="eye" :href="route('leases.notification-preview', [$apartment, $lease])" target="_blank">{{ __('Podgląd wiadomości') }}</flux:button>
+                            @endif
+                            <flux:button size="sm" wire:click="toggleNotifications">{{ $lease->notify_tenants ? __('Wyłącz') : __('Włącz') }}</flux:button>
+                        </div>
+                    </div>
                 </flux:card>
 
                 {{-- Deposit --}}

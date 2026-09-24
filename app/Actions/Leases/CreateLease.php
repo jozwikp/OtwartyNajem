@@ -51,6 +51,12 @@ class CreateLease
 
             $this->accrue->handle($lease);
 
+            // Months before the current one are history: the tenant only hears about this month on.
+            $lease->ledgerEntries()
+                ->where('period', '<', now()->startOfMonth()->toDateString())
+                ->get()
+                ->each(fn ($entry) => $entry->forceFill(['notified_at' => now(), 'notified_amount' => $entry->amount])->saveQuietly());
+
             return $lease;
         });
     }

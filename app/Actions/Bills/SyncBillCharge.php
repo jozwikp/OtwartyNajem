@@ -50,6 +50,12 @@ class SyncBillCharge
         }
 
         $entry ??= new LedgerEntry(['kind' => LedgerKind::Charge]);
+
+        if ($entry->exists && $entry->lease_id !== $lease->id) {
+            // Moved to another lease: that tenant hasn't been told about it yet.
+            $entry->forceFill(['notified_at' => null, 'notified_amount' => null]);
+        }
+
         $entry->lease()->associate($lease);
         $entry->source()->associate($bill);
         $entry->fill([

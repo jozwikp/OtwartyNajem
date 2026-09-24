@@ -1,6 +1,10 @@
 <?php
 
+use App\Mail\TenantDigestMail;
+use App\Models\Apartment;
 use App\Models\Bill;
+use App\Models\Lease;
+use App\Support\TenantDigest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
             Route::livewire('najmy/{lease}', 'pages::leases.show')->name('leases.show');
             Route::livewire('najmy/{lease}/edytuj', 'pages::leases.edit')->name('leases.edit');
             Route::livewire('najmy/{lease}/rozliczenia', 'pages::leases.ledger')->name('leases.ledger');
+            Route::get('najmy/{lease}/powiadomienie', fn (Apartment $apartment, Lease $lease) => new TenantDigestMail(new TenantDigest($lease)))
+                ->name('leases.notification-preview');
         });
     });
 });

@@ -37,7 +37,11 @@ class ActivityPresenter
     public function icon(): string
     {
         return match ($this->activity->log_name) {
-            'leases' => $this->activity->event === 'created' ? 'key' : 'document-text',
+            'leases' => match ($this->activity->event) {
+                'created' => 'key',
+                'tenant_notified' => 'paper-airplane',
+                default => 'document-text',
+            },
             'lease_tenants' => 'user',
             'recurring_charges', 'recurring_charge_rates' => 'calendar-days',
             'bills' => $this->activity->event === 'ai_read' ? 'sparkles' : 'receipt-percent',
@@ -80,6 +84,10 @@ class ActivityPresenter
             'leases.created' => __('Dodano najem od :date', ['date' => $this->formatValue('starts_on', $this->attribute('starts_on'))]),
             'leases.updated' => $this->leaseUpdateTitle(),
             'leases.deleted' => __('Usunięto najem'),
+            'leases.tenant_notified' => __('Wysłano podsumowanie do najemcy (:emails): :subject', [
+                'emails' => implode(', ', (array) $this->activity->getProperty('recipients', [])),
+                'subject' => $this->activity->getProperty('subject'),
+            ]),
 
             'lease_tenants.created' => __('Dodano najemcę: :name', ['name' => $this->tenantName()]),
             'lease_tenants.updated' => __('Zmieniono dane najemcy: :name', ['name' => $this->tenantName()]),
@@ -207,6 +215,7 @@ class ActivityPresenter
         return match (true) {
             in_array('terminated_on', $changed, true) && $this->attribute('terminated_on') !== null => __('Zakończono najem z dniem :date', ['date' => $this->formatValue('terminated_on', $this->attribute('terminated_on'))]),
             in_array('deposit_returned_amount', $changed, true) || in_array('deposit_returned_on', $changed, true) => __('Zapisano zwrot kaucji'),
+            $changed === ['notify_tenants'] => $this->attribute('notify_tenants') ? __('Włączono powiadomienia e-mail dla najemcy') : __('Wyłączono powiadomienia e-mail dla najemcy'),
             default => __('Zmieniono warunki najmu'),
         };
     }
@@ -244,11 +253,19 @@ class ActivityPresenter
         $subject = $this->activity->subject;
         $name = $subject instanceof RecurringChargeRate ? $subject->charge?->label : null;
         $amount = (int) $this->attribute('amount');
-        $month = $this->attribute('valid_from') ? CarbonImmutable::parse($this->attribute('valid_from'))->locale('pl')->isoFormat('D MMMM YYYY') : '';
+        $month = $this->attribute('valid_from') ? $this->date($this->attribute('valid_from'))->locale('pl')->isoFormat('D MMMM YYYY') : '';
 
         return $amount === 0
             ? __(':name: bez opłaty od :month', ['name' => $name ?? __('Opłata'), 'month' => $month])
             : __(':name: :amount od :month', ['name' => $name ?? __('Opłata'), 'amount' => $this->formatValue('amount', $amount), 'month' => $month]);
+    }
+
+    /**
+     * Dates are logged as UTC timestamps; show them as the local calendar day.
+     */
+    protected function date(string $value): CarbonImmutable
+    {
+        return CarbonImmutable::parse($value)->setTimezone(config('app.timezone'));
     }
 
     protected function formatValue(string $attribute, mixed $value): string
@@ -263,11 +280,11 @@ class ActivityPresenter
             $attribute === 'country_code' => Countries::name($value),
             $attribute === 'area' => Number::format((float) $value, maxPrecision: 2, locale: 'pl').' m²',
             in_array($attribute, self::MONEY_ATTRIBUTES, true) => Money::format((int) $value, $currency),
-            in_array($attribute, self::DATE_ATTRIBUTES, true) => CarbonImmutable::parse($value)->format('d.m.Y'),
+            in_array($attribute, self::DATE_ATTRIBUTES, true) => $this->date($value)->format('d.m.Y'),
             $attribute === 'category' => BillCategory::tryFrom($value)?->label() ?? (string) $value,
             in_array($attribute, ['deposit_method', 'payment_method'], true) => PaymentMethod::tryFrom($value)?->label() ?? (string) $value,
             $attribute === 'bank_account' => BankAccount::format($value),
-            $attribute === 'is_primary' => $value ? __('tak') : __('nie'),
+            in_array($attribute, ['is_primary', 'notify_tenants'], true) => $value ? __('tak') : __('nie'),
             $attribute === 'apartment_id' => Apartment::withTrashed()->find($value)?->label ?? (string) $value,
             $attribute === 'status' => BillStatus::tryFrom($value)?->label() ?? (string) $value,
             default => (string) $value,

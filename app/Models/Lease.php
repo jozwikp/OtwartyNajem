@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $payment_due_day
  * @property string|null $bank_account
  * @property string|null $notes
+ * @property bool $notify_tenants
+ * @property CarbonImmutable|null $last_notified_at
  * @property int|null $deposit_amount
  * @property PaymentMethod|null $deposit_method
  * @property CarbonImmutable|null $deposit_returned_on
@@ -34,7 +36,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Apartment $apartment
  */
 #[Fillable([
-    'starts_on', 'ends_on', 'terminated_on', 'currency', 'payment_due_day', 'bank_account', 'notes',
+    'starts_on', 'ends_on', 'terminated_on', 'currency', 'payment_due_day', 'bank_account', 'notes', 'notify_tenants',
     'deposit_amount', 'deposit_method', 'deposit_returned_on', 'deposit_returned_amount', 'deposit_return_notes',
 ])]
 class Lease extends Model
@@ -50,6 +52,8 @@ class Lease extends Model
             'terminated_on' => 'immutable_date',
             'deposit_returned_on' => 'immutable_date',
             'payment_due_day' => 'integer',
+            'notify_tenants' => 'boolean',
+            'last_notified_at' => 'immutable_datetime',
             'deposit_amount' => 'integer',
             'deposit_returned_amount' => 'integer',
             'deposit_method' => PaymentMethod::class,
@@ -84,6 +88,7 @@ class Lease extends Model
             'payment_due_day' => __('Termin płatności (dzień miesiąca)'),
             'bank_account' => __('Numer konta'),
             'notes' => __('Informacje dodatkowe'),
+            'notify_tenants' => __('Powiadomienia e-mail dla najemcy'),
             'deposit_amount' => __('Kaucja'),
             'deposit_method' => __('Sposób wpłaty kaucji'),
             'deposit_returned_on' => __('Data zwrotu kaucji'),
@@ -177,6 +182,16 @@ class Lease extends Model
     public function hasLedgerEntries(): bool
     {
         return $this->ledgerEntries()->exists();
+    }
+
+    /**
+     * E-mail addresses of the tenants that get the daily summary.
+     *
+     * @return list<string>
+     */
+    public function tenantEmails(): array
+    {
+        return $this->tenants->pluck('email')->filter()->unique()->values()->all();
     }
 
     public function tenantNames(): string

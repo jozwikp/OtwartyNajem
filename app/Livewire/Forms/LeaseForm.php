@@ -30,6 +30,8 @@ class LeaseForm extends Form
 
     public string $notes = '';
 
+    public bool $notify_tenants = true;
+
     public bool $has_deposit = false;
 
     public string $deposit_amount = '';
@@ -45,6 +47,7 @@ class LeaseForm extends Form
         $this->currency = $lease->currency;
         $this->bank_account = BankAccount::format($lease->bank_account);
         $this->notes = (string) $lease->notes;
+        $this->notify_tenants = $lease->notify_tenants;
         $this->has_deposit = $lease->deposit_amount !== null;
         $this->deposit_amount = Money::toInput($lease->deposit_amount);
         $this->deposit_method = $lease->deposit_method?->value ?? 'transfer';
@@ -136,6 +139,7 @@ class LeaseForm extends Form
             'currency' => $this->currency,
             'bank_account' => filled($this->bank_account) ? BankAccount::normalize($this->bank_account) : null,
             'notes' => filled($this->notes) ? trim($this->notes) : null,
+            'notify_tenants' => $this->notify_tenants,
             'deposit_amount' => $this->has_deposit ? Money::parse($this->deposit_amount) : null,
             'deposit_method' => $this->has_deposit ? PaymentMethod::from($this->deposit_method) : null,
         ];

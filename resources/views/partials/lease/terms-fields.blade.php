@@ -42,4 +42,8 @@
         :placeholder="__('Np. okres wypowiedzenia, liczba kluczy, stan liczników przy wprowadzeniu…')"
         rows="3"
     />
+
+    <div class="rounded-xl border border-line bg-card p-4">
+        <flux:switch wire:model="form.notify_tenants" :label="__('Wysyłaj najemcy podsumowania e-mailem')" :description="__('Raz dziennie po 16:00, tylko gdy pojawią się nowe opłaty lub rachunki: co doszło, ile jest do zapłaty i na jakie konto.')" align="left" />
+    </div>
 </div>

@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int|null $source_id
  * @property PaymentMethod|null $payment_method
  * @property string|null $notes
+ * @property CarbonImmutable|null $notified_at
+ * @property int|null $notified_amount
  * @property-read Lease $lease
  */
 #[Fillable([
@@ -59,6 +61,8 @@ class LedgerEntry extends Model
             'booked_on' => 'immutable_date',
             'due_on' => 'immutable_date',
             'period' => 'immutable_date',
+            'notified_at' => 'immutable_datetime',
+            'notified_amount' => 'integer',
         ];
     }
 

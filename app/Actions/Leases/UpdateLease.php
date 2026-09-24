@@ -35,9 +35,17 @@ class UpdateLease
 
             $this->ensureNoOverlap->handle($lease->apartment, $lease->starts_on, $lease->effectiveEndsOn(), $lease->id, 'ends_on');
 
+            $turnedOnNotifications = $lease->isDirty('notify_tenants') && $lease->notify_tenants;
+
             $lease->save();
 
             $this->accrue->handle($lease);
+
+            if ($turnedOnNotifications) {
+                // Start fresh: the tenant only hears about what happens from now on.
+                $lease->ledgerEntries()->whereNull('notified_at')->get()
+                    ->each(fn ($entry) => $entry->forceFill(['notified_at' => now(), 'notified_amount' => $entry->amount])->saveQuietly());
+            }
         });
     }
 }
