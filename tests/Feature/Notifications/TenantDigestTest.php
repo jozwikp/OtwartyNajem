@@ -56,6 +56,7 @@ function approvedBill(Lease $lease, int $amount = 31240): Bill
 }
 
 test('one daily summary goes out with new charges, balance and bank details', function () {
+    $this->apartment->owners()->attach(User::factory()->create(['email' => 'piotr@example.com']));
     $lease = leaseStarting('2026-09-01');
     approvedBill($lease);
 
@@ -66,6 +67,9 @@ test('one daily summary goes out with new charges, balance and bank details', fu
         $html = $mail->render();
 
         return $mail->hasTo('jan@example.com')
+            && $mail->hasCc('anna@example.com')
+            && $mail->hasCc('piotr@example.com')
+            && ! $mail->hasTo('anna@example.com')
             && $mail->hasReplyTo('anna@example.com')
             && $mail->hasSubject('Kawalerka Mokotów – do zapłaty '.Money::format(281240, 'PLN'))
             && str_contains($html, 'Opłata za mieszkanie – wrzesień 2026')
@@ -80,10 +84,11 @@ test('one daily summary goes out with new charges, balance and bank details', fu
 
     $activity = Activity::where('event', 'tenant_notified')->sole();
     expect($activity->getProperty('recipients'))->toBe(['jan@example.com'])
+        ->and($activity->getProperty('cc'))->toEqualCanonicalizing(['anna@example.com', 'piotr@example.com'])
         ->and($activity->getProperty('balance'))->toBe(281240)
         ->and($lease->fresh()->last_notified_at)->not->toBeNull();
 
-    $this->get(route('apartments.history', $this->apartment))->assertSee('Wysłano podsumowanie do najemcy (jan@example.com)');
+    $this->get(route('apartments.history', $this->apartment))->assertSee('Wysłano podsumowanie do najemcy (jan@example.com, kopia do właścicieli)');
 });
 
 test('past months of a newly entered lease are not announced', function () {

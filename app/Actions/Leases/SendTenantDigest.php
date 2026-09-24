@@ -27,9 +27,12 @@ class SendTenantDigest
             return false;
         }
 
-        Mail::to($lease->tenantEmails())->send(new TenantDigestMail($digest));
+        $ownerEmails = $lease->apartment->owners->pluck('email')->filter()->unique()->values()->all();
 
-        DB::transaction(function () use ($lease, $digest) {
+        // Owners always get a copy of what their tenant was told.
+        Mail::to($lease->tenantEmails())->cc($ownerEmails)->send(new TenantDigestMail($digest));
+
+        DB::transaction(function () use ($lease, $digest, $ownerEmails) {
             $digest->markAsSent();
 
             activity('leases')
@@ -37,6 +40,7 @@ class SendTenantDigest
                 ->event('tenant_notified')
                 ->withProperties([
                     'recipients' => $lease->tenantEmails(),
+                    'cc' => $ownerEmails,
                     'new_charges' => $digest->newCharges->map(fn ($e) => ['description' => $e->description, 'amount' => $e->amount])->all(),
                     'changed_charges' => $digest->changedCharges->map(fn ($e) => ['description' => $e->description, 'from' => $e->notified_amount, 'to' => $e->amount])->all(),
                     'payments' => $digest->payments->sum('amount'),

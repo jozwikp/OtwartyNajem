@@ -84,7 +84,7 @@ class ActivityPresenter
             'leases.created' => __('Dodano najem od :date', ['date' => $this->formatValue('starts_on', $this->attribute('starts_on'))]),
             'leases.updated' => $this->leaseUpdateTitle(),
             'leases.deleted' => __('Usunięto najem'),
-            'leases.tenant_notified' => __('Wysłano podsumowanie do najemcy (:emails): :subject', [
+            'leases.tenant_notified' => __('Wysłano podsumowanie do najemcy (:emails, kopia do właścicieli): :subject', [
                 'emails' => implode(', ', (array) $this->activity->getProperty('recipients', [])),
                 'subject' => $this->activity->getProperty('subject'),
             ]),

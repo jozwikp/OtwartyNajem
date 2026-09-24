@@ -522,7 +522,7 @@ new #[Title('Najem')] class extends Component {
                                 <flux:heading size="lg">{{ __('Powiadomienia e-mail dla najemcy') }}</flux:heading>
                                 <flux:badge size="sm" :color="$lease->notify_tenants ? 'green' : 'zinc'">{{ $lease->notify_tenants ? __('włączone') : __('wyłączone') }}</flux:badge>
                             </div>
-                            <flux:text class="mt-1 text-sm">{{ __('Jedna wiadomość dziennie po 16:00, tylko gdy są nowe opłaty, rachunki lub zmiany kwot. Bez załączników.') }}</flux:text>
+                            <flux:text class="mt-1 text-sm">{{ __('Jedna wiadomość dziennie po 16:00, tylko gdy są nowe opłaty, rachunki lub zmiany kwot. Bez załączników. Właściciele dostają kopię.') }}</flux:text>
 
                             @if ($lease->notify_tenants)
                                 @if ($emails === [])
@@ -532,6 +532,7 @@ new #[Title('Najem')] class extends Component {
                                 @else
                                     <flux:text class="mt-3 text-sm">
                                         {{ __('Odbiorcy: :emails', ['emails' => implode(', ', $emails)]) }}<br>
+                                        {{ __('Kopia do właścicieli: :emails', ['emails' => $apartment->owners->pluck('email')->join(', ')]) }}<br>
                                         @if ($pendingCount > 0)
                                             <strong>{{ trans_choice('Dziś po 16:00 wyślemy :count nową pozycję.|Dziś po 16:00 wyślemy :count nowe pozycje.|Dziś po 16:00 wyślemy :count nowych pozycji.', $pendingCount) }}</strong>
                                         @else
