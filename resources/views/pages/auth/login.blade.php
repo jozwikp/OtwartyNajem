@@ -14,7 +14,7 @@
             <flux:input
                 name="email"
                 :label="__('Email address')"
-                :value="old('email')"
+                :value="old('email', session('invitation_email'))"
                 type="email"
                 required
                 autofocus
