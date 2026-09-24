@@ -1,9 +1,11 @@
-{{-- Apartment page header with tabs. Expects $apartment and $current (route name of the active tab). --}}
+{{-- Apartment page header with tabs. Expects $apartment and $current (key of the active tab). --}}
 @php
     $tabs = [
-        ['route' => 'apartments.show', 'label' => __('Informacje'), 'icon' => 'home-modern'],
-        ['route' => 'apartments.owners', 'label' => __('Właściciele'), 'icon' => 'users'],
-        ['route' => 'apartments.history', 'label' => __('Historia zmian'), 'icon' => 'clock'],
+        ['key' => 'apartments.show', 'route' => 'apartments.show', 'label' => __('Informacje'), 'icon' => 'home-modern'],
+        ['key' => 'leases.show', 'route' => 'leases.current', 'label' => __('Najem'), 'icon' => 'key'],
+        ['key' => 'leases.ledger', 'route' => 'leases.ledger.current', 'label' => __('Rozliczenia'), 'icon' => 'banknotes'],
+        ['key' => 'apartments.owners', 'route' => 'apartments.owners', 'label' => __('Właściciele'), 'icon' => 'users'],
+        ['key' => 'apartments.history', 'route' => 'apartments.history', 'label' => __('Historia zmian'), 'icon' => 'clock'],
     ];
 @endphp
 
@@ -23,7 +25,7 @@
 
     <nav class="relative -mb-px mt-6 flex gap-1 overflow-x-auto overflow-y-hidden" aria-label="{{ __('Sekcje mieszkania') }}">
         @foreach ($tabs as $tab)
-            @php $active = $current === $tab['route']; @endphp
+            @php $active = $current === $tab['key']; @endphp
             <a
                 href="{{ route($tab['route'], $apartment) }}"
                 wire:navigate

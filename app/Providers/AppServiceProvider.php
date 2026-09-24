@@ -65,10 +65,19 @@ class AppServiceProvider extends ServiceProvider
         Activity::creating(function (Activity $activity) {
             $request = request();
 
-            $activity->properties = collect($activity->properties)->merge([
+            $context = [
                 'ip' => $request->ip(),
                 'user_agent' => Str::limit((string) $request->userAgent(), 250, ''),
-            ]);
+            ];
+
+            // Lease, bill, payment… changes also show up in the apartment's history.
+            $subject = $activity->subject;
+            if ($subject && method_exists($subject, 'auditApartmentId')) {
+                $context['apartment_id'] = $subject->auditApartmentId();
+                $context['currency'] = $subject->auditCurrency();
+            }
+
+            $activity->properties = collect($activity->properties)->merge($context);
         });
 
         Event::listen(Login::class, function (Login $event) {

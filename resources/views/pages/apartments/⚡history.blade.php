@@ -20,8 +20,11 @@ new #[Title('Historia zmian')] class extends Component {
     #[Computed]
     public function activities()
     {
-        return Activity::forSubject($this->apartment)
-            ->with('causer')
+        return Activity::query()
+            ->where(fn ($query) => $query
+                ->where(fn ($q) => $q->where('subject_type', $this->apartment->getMorphClass())->where('subject_id', $this->apartment->id))
+                ->orWhere('properties->apartment_id', $this->apartment->id))
+            ->with(['causer', 'subject'])
             ->latest('id')
             ->paginate(20);
     }

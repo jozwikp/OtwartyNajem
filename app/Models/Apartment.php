@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\LeaseStatus;
 use App\Support\Countries;
+use Carbon\CarbonImmutable;
 use Database\Factories\ApartmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
@@ -102,6 +105,51 @@ class Apartment extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(ApartmentInvitation::class);
+    }
+
+    /**
+     * @return HasMany<Lease, $this>
+     */
+    public function leases(): HasMany
+    {
+        return $this->hasMany(Lease::class)->orderByDesc('starts_on');
+    }
+
+    /**
+     * @return HasManyThrough<Bill, Lease, $this>
+     */
+    public function bills(): HasManyThrough
+    {
+        return $this->hasManyThrough(Bill::class, Lease::class);
+    }
+
+    /**
+     * The lease to show by default: the one in progress, otherwise the next one, otherwise the most recent.
+     */
+    public function mainLease(): ?Lease
+    {
+        $leases = $this->leases()->get();
+        $today = CarbonImmutable::today();
+
+        return $leases->first(fn (Lease $lease) => $lease->status($today) === LeaseStatus::Active)
+            ?? $leases->filter(fn (Lease $lease) => $lease->status($today) === LeaseStatus::Upcoming)->sortBy('starts_on')->first()
+            ?? $leases->first();
+    }
+
+    /**
+     * Another lease of this apartment that overlaps the given period (only one lease at a time is allowed).
+     */
+    public function overlappingLease(CarbonImmutable $startsOn, ?CarbonImmutable $endsOn, ?int $exceptLeaseId = null): ?Lease
+    {
+        return $this->leases()
+            ->when($exceptLeaseId, fn ($query) => $query->whereKeyNot($exceptLeaseId))
+            ->get()
+            ->first(function (Lease $lease) use ($startsOn, $endsOn) {
+                $otherEnd = $lease->effectiveEndsOn();
+
+                return ($endsOn === null || $lease->starts_on->lte($endsOn))
+                    && ($otherEnd === null || $otherEnd->gte($startsOn));
+            });
     }
 
     /**

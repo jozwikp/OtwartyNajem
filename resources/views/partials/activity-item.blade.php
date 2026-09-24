@@ -9,8 +9,8 @@
     <div class="min-w-0 flex-1 pt-1">
         <div class="font-medium">{{ $presenter->title() }}</div>
 
-        @if (($showSubject ?? false) && $activity->subject)
-            <flux:link :href="route('apartments.show', $activity->subject)" wire:navigate class="text-sm">{{ $activity->subject->label }}</flux:link>
+        @if (($showSubject ?? false) && ($apartment = $presenter->apartment()))
+            <flux:link :href="route('apartments.show', $apartment)" wire:navigate class="text-sm">{{ $apartment->label }}</flux:link>
         @endif
 
         <flux:text class="text-sm">

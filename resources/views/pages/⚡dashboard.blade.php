@@ -27,9 +27,12 @@ new #[Title('Pulpit')] class extends Component {
     #[Computed]
     public function recentActivity()
     {
+        $apartmentIds = Auth::user()->apartments()->pluck('apartments.id');
+
         return Activity::query()
-            ->where('subject_type', (new Apartment)->getMorphClass())
-            ->whereIn('subject_id', Auth::user()->apartments()->select('apartments.id'))
+            ->where(fn ($query) => $query
+                ->where(fn ($q) => $q->where('subject_type', (new Apartment)->getMorphClass())->whereIn('subject_id', $apartmentIds))
+                ->orWhereIn('properties->apartment_id', $apartmentIds))
             ->with(['causer', 'subject'])
             ->latest('id')
             ->limit(8)
