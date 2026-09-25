@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Database\Factories\ApartmentInvitationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -9,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -19,11 +19,13 @@ use Illuminate\Support\Str;
  * @property string $token
  * @property int|null $invited_by
  * @property int|null $accepted_by
- * @property Carbon|null $accepted_at
- * @property Carbon|null $declined_at
- * @property Carbon $expires_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $accepted_at
+ * @property CarbonImmutable|null $declined_at
+ * @property CarbonImmutable $expires_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Apartment $apartment
+ * @property-read User|null $inviter
  */
 #[Fillable(['email', 'token', 'invited_by', 'expires_at'])]
 #[Hidden(['token'])]

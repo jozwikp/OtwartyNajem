@@ -11,6 +11,7 @@ use App\Models\Bill;
 use App\Models\Lease;
 use App\Models\LeaseTenant;
 use App\Models\RecurringChargeRate;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Number;
 use Spatie\Activitylog\Models\Activity;
@@ -133,7 +134,9 @@ class ActivityPresenter
 
     public function causerName(): string
     {
-        return $this->activity->causer?->name ?? __('System (automatycznie)');
+        $causer = $this->activity->causer;
+
+        return $causer instanceof User ? $causer->name : __('System (automatycznie)');
     }
 
     /**
@@ -151,7 +154,7 @@ class ActivityPresenter
             return null;
         }
 
-        return static::$apartments[$id] ??= Apartment::find($id);
+        return static::$apartments[(int) $id] ??= Apartment::find((int) $id);
     }
 
     /**
@@ -251,9 +254,9 @@ class ActivityPresenter
     protected function rateTitle(): string
     {
         $subject = $this->activity->subject;
-        $name = $subject instanceof RecurringChargeRate ? $subject->charge?->label : null;
+        $name = $subject instanceof RecurringChargeRate ? $subject->charge->label : null;
         $amount = (int) $this->attribute('amount');
-        $month = $this->attribute('valid_from') ? $this->date($this->attribute('valid_from'))->locale('pl')->isoFormat('D MMMM YYYY') : '';
+        $month = $this->attribute('valid_from') ? $this->date($this->attribute('valid_from'))->isoFormat('D MMMM YYYY') : '';
 
         return $amount === 0
             ? __(':name: bez opłaty od :month', ['name' => $name ?? __('Opłata'), 'month' => $month])
@@ -285,7 +288,7 @@ class ActivityPresenter
             in_array($attribute, ['deposit_method', 'payment_method'], true) => PaymentMethod::tryFrom($value)?->label() ?? (string) $value,
             $attribute === 'bank_account' => BankAccount::format($value),
             in_array($attribute, ['is_primary', 'notify_tenants'], true) => $value ? __('tak') : __('nie'),
-            $attribute === 'apartment_id' => Apartment::withTrashed()->find($value)?->label ?? (string) $value,
+            $attribute === 'apartment_id' => Apartment::withTrashed()->find((int) $value)->label ?? (string) $value,
             $attribute === 'status' => BillStatus::tryFrom($value)?->label() ?? (string) $value,
             default => (string) $value,
         };

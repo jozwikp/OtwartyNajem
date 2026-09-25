@@ -103,7 +103,7 @@ class AccrueRecurringCharges
 
         $dueOn = $monthStart->setDay(min($lease->payment_due_day, $daysInMonth))->max($from);
 
-        $description = $charge->label.' – '.$monthStart->locale('pl')->isoFormat('MMMM YYYY');
+        $description = $charge->label.' – '.$monthStart->isoFormat('MMMM YYYY');
         if ($days !== $daysInMonth) {
             $description .= ' '.__('(za :days z :total dni)', ['days' => $days, 'total' => $daysInMonth]);
         }

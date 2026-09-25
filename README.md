@@ -22,7 +22,7 @@ Laravel 13 · Livewire 4 · Flux UI · Tailwind CSS 4 · SQLite (domyślnie) · 
 
 ## Wymagania
 
-- PHP 8.3+ (z rozszerzeniami `intl`, `pdo_sqlite`)
+- PHP 8.4+ (z rozszerzeniami `intl`, `pdo_sqlite`)
 - Composer
 - Node.js 20+ i npm
 - Klucz API [OpenRouter](https://openrouter.ai) – do odczytu faktur

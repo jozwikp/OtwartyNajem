@@ -29,7 +29,7 @@ class ChangeChargeAmount
         if ($validFrom->lt($earliest)) {
             throw ValidationException::withMessages([
                 'validFrom' => __('Kwotę można zmienić najwcześniej od :month (wcześniejsze miesiące są już naliczone).', [
-                    'month' => $earliest->locale('pl')->isoFormat('D MMMM YYYY'),
+                    'month' => $earliest->isoFormat('D MMMM YYYY'),
                 ]),
             ]);
         }

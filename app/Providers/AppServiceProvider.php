@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\BelongsToApartment;
 use App\Models\User;
 use App\Support\Audit;
 use Carbon\CarbonImmutable;
@@ -72,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Lease, bill, payment… changes also show up in the apartment's history.
             $subject = $activity->subject;
-            if ($subject && method_exists($subject, 'auditApartmentId')) {
+            if ($subject instanceof BelongsToApartment) {
                 $context['apartment_id'] = $subject->auditApartmentId();
                 $context['currency'] = $subject->auditCurrency();
             }

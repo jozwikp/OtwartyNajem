@@ -27,7 +27,7 @@ class ApartmentInvitationNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $apartment = $this->invitation->apartment;
-        $inviter = $this->invitation->inviter?->name ?? __('Współwłaściciel');
+        $inviter = $this->invitation->inviter->name ?? __('Współwłaściciel');
 
         return (new MailMessage)
             ->subject(__('Zaproszenie do mieszkania :label', ['label' => $apartment->label]))

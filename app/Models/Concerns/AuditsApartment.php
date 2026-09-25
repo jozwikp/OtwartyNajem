@@ -8,6 +8,7 @@ use Spatie\Activitylog\Support\LogOptions;
 /**
  * Models that belong to an apartment: their changes are logged and appear
  * in the apartment's change history (via the "apartment_id" property).
+ * Use together with the BelongsToApartment interface.
  */
 trait AuditsApartment
 {

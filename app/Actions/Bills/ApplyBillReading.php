@@ -61,7 +61,7 @@ class ApplyBillReading
         }
 
         $bill->lease()->associate(SyncBillCharge::leaseFor($bill));
-        $bill->currency ??= $bill->lease?->currency ?? Currencies::DEFAULT;
+        $bill->currency ??= $bill->lease->currency ?? Currencies::DEFAULT;
 
         if (($result['is_bill'] ?? true) === false) {
             $bill->status = BillStatus::Failed;

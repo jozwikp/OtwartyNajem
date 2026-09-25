@@ -50,7 +50,7 @@ class LeaseForm extends Form
         $this->notify_tenants = $lease->notify_tenants;
         $this->has_deposit = $lease->deposit_amount !== null;
         $this->deposit_amount = Money::toInput($lease->deposit_amount);
-        $this->deposit_method = $lease->deposit_method?->value ?? 'transfer';
+        $this->deposit_method = $lease->deposit_method->value ?? 'transfer';
     }
 
     /**

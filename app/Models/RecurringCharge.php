@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToApartment;
 use App\Enums\ChargeType;
 use App\Models\Concerns\AuditsApartment;
 use Carbon\CarbonImmutable;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Lease $lease
  */
 #[Fillable(['type', 'name'])]
-class RecurringCharge extends Model
+class RecurringCharge extends Model implements BelongsToApartment
 {
     use AuditsApartment;
 
@@ -34,12 +35,12 @@ class RecurringCharge extends Model
 
     public function auditApartmentId(): ?int
     {
-        return $this->lease?->apartment_id;
+        return $this->lease->apartment_id;
     }
 
     public function auditCurrency(): ?string
     {
-        return $this->lease?->currency;
+        return $this->lease->currency;
     }
 
     protected function auditedAttributes(): array
@@ -71,9 +72,12 @@ class RecurringCharge extends Model
         return $this->morphMany(LedgerEntry::class, 'source');
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function label(): Attribute
     {
-        return Attribute::get(fn () => $this->type === ChargeType::Other && filled($this->name)
+        return Attribute::get(fn (): string => $this->type === ChargeType::Other && filled($this->name)
             ? $this->name
             : $this->type->label());
     }

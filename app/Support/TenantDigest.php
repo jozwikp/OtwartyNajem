@@ -65,7 +65,7 @@ class TenantDigest
     {
         return __('Opłaty :label :month', [
             'label' => $this->lease->apartment->label,
-            'month' => now()->locale('pl')->isoFormat('MM/YYYY'),
+            'month' => now()->isoFormat('MM/YYYY'),
         ]);
     }
 

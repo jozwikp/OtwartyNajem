@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToApartment;
 use App\Enums\LeaseStatus;
 use App\Enums\LedgerKind;
 use App\Enums\PaymentMethod;
@@ -39,7 +40,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'starts_on', 'ends_on', 'terminated_on', 'currency', 'payment_due_day', 'bank_account', 'notes', 'notify_tenants',
     'deposit_amount', 'deposit_method', 'deposit_returned_on', 'deposit_returned_amount', 'deposit_return_notes',
 ])]
-class Lease extends Model
+class Lease extends Model implements BelongsToApartment
 {
     /** @use HasFactory<LeaseFactory> */
     use AuditsApartment, HasFactory, SoftDeletes;
@@ -72,7 +73,7 @@ class Lease extends Model
 
     protected function auditedAttributes(): array
     {
-        return $this->getFillable();
+        return array_values($this->getFillable());
     }
 
     /**
@@ -103,6 +104,14 @@ class Lease extends Model
     public function apartment(): BelongsTo
     {
         return $this->belongsTo(Apartment::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -191,7 +200,11 @@ class Lease extends Model
      */
     public function tenantEmails(): array
     {
-        return $this->tenants->pluck('email')->filter()->unique()->values()->all();
+        return array_values($this->tenants
+            ->map(fn (LeaseTenant $tenant): ?string => $tenant->email)
+            ->filter(fn (?string $email): bool => filled($email))
+            ->unique()
+            ->all());
     }
 
     public function tenantNames(): string

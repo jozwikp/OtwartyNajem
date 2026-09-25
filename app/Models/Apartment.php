@@ -173,24 +173,36 @@ class Apartment extends Model
         return $user !== null && $this->owners()->whereKey($user->id)->exists();
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function addressLine(): Attribute
     {
-        return Attribute::get(fn () => $this->street.(filled($this->unit_number) ? ' / '.__('lok.').' '.$this->unit_number : ''));
+        return Attribute::get(fn (): string => $this->street.(filled($this->unit_number) ? ' / '.__('lok.').' '.$this->unit_number : ''));
     }
 
+    /**
+     * @return Attribute<non-falsy-string, never>
+     */
     protected function fullAddress(): Attribute
     {
-        return Attribute::get(fn () => $this->address_line.', '.$this->postal_code.' '.$this->city.
+        return Attribute::get(fn (): string => $this->address_line.', '.$this->postal_code.' '.$this->city.
             ($this->country_code !== 'PL' ? ', '.$this->country_name : ''));
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function countryName(): Attribute
     {
-        return Attribute::get(fn () => Countries::name($this->country_code));
+        return Attribute::get(fn (): string => Countries::name($this->country_code));
     }
 
+    /**
+     * @return Attribute<non-falsy-string, never>
+     */
     protected function areaFormatted(): Attribute
     {
-        return Attribute::get(fn () => Number::format((float) $this->area, maxPrecision: 2, locale: 'pl').' m²');
+        return Attribute::get(fn (): string => Number::format((float) $this->area, maxPrecision: 2, locale: 'pl').' m²');
     }
 }

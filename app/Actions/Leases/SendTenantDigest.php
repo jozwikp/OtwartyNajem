@@ -17,7 +17,7 @@ class SendTenantDigest
     {
         $lease->load(['tenants', 'apartment.owners']);
 
-        if (! $lease->notify_tenants || ! $lease->apartment || $lease->tenantEmails() === []) {
+        if (! $lease->notify_tenants || $lease->tenantEmails() === []) {
             return false;
         }
 

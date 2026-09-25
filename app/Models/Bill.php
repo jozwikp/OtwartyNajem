@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToApartment;
 use App\Enums\BillCategory;
 use App\Enums\BillStatus;
 use App\Models\Concerns\AuditsApartment;
@@ -46,7 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'status', 'category', 'supplier', 'invoice_number', 'issued_on', 'period_from', 'period_to',
     'currency', 'total_amount', 'tenant_amount', 'due_on', 'file_path', 'file_name', 'file_mime', 'created_by',
 ])]
-class Bill extends Model
+class Bill extends Model implements BelongsToApartment
 {
     use AuditsApartment, SoftDeletes;
 

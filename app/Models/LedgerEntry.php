@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToApartment;
 use App\Enums\LedgerKind;
 use App\Enums\PaymentMethod;
 use App\Models\Concerns\AuditsApartment;
@@ -36,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
     'kind', 'currency', 'amount', 'booked_on', 'due_on', 'period', 'description',
     'payment_method', 'notes', 'created_by',
 ])]
-class LedgerEntry extends Model
+class LedgerEntry extends Model implements BelongsToApartment
 {
     use AuditsApartment;
 
@@ -68,7 +69,7 @@ class LedgerEntry extends Model
 
     public function auditApartmentId(): ?int
     {
-        return $this->lease?->apartment_id;
+        return $this->lease->apartment_id;
     }
 
     public function auditCurrency(): ?string

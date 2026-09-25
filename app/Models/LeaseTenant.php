@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToApartment;
 use App\Models\Concerns\AuditsApartment;
 use Database\Factories\LeaseTenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Lease $lease
  */
 #[Fillable(['first_name', 'last_name', 'email', 'phone', 'is_primary'])]
-class LeaseTenant extends Model
+class LeaseTenant extends Model implements BelongsToApartment
 {
     /** @use HasFactory<LeaseTenantFactory> */
     use AuditsApartment, HasFactory;
@@ -34,7 +35,7 @@ class LeaseTenant extends Model
 
     public function auditApartmentId(): ?int
     {
-        return $this->lease?->apartment_id;
+        return $this->lease->apartment_id;
     }
 
     protected function auditedAttributes(): array
@@ -50,8 +51,11 @@ class LeaseTenant extends Model
         return $this->belongsTo(Lease::class);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function fullName(): Attribute
     {
-        return Attribute::get(fn () => trim($this->first_name.' '.$this->last_name));
+        return Attribute::get(fn (): string => trim($this->first_name.' '.$this->last_name));
     }
 }

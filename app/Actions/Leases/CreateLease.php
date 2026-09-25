@@ -30,10 +30,10 @@ class CreateLease
             $this->ensureNoOverlap->handle($apartment, $startsOn, $endsOn);
 
             $lease = new Lease($leaseData);
-            $lease->created_by = $user->id;
+            $lease->creator()->associate($user);
             $apartment->leases()->save($lease);
 
-            foreach (array_values($tenants) as $index => $tenant) {
+            foreach ($tenants as $index => $tenant) {
                 $lease->tenants()->create([...$tenant, 'is_primary' => $index === 0]);
             }
 
