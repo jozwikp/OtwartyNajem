@@ -131,6 +131,14 @@ class Lease extends Model implements BelongsToApartment
     }
 
     /**
+     * @return HasMany<LeasePayer, $this>
+     */
+    public function payers(): HasMany
+    {
+        return $this->hasMany(LeasePayer::class);
+    }
+
+    /**
      * @return HasMany<RecurringCharge, $this>
      */
     public function recurringCharges(): HasMany

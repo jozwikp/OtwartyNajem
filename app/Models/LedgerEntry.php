@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\BelongsToApartment;
+use App\Enums\BankTransactionStatus;
 use App\Enums\LedgerKind;
 use App\Enums\PaymentMethod;
 use App\Models\Concerns\AuditsApartment;
@@ -49,6 +50,16 @@ class LedgerEntry extends Model implements BelongsToApartment
 
             if ($entry->currency !== $leaseCurrency) {
                 throw new DomainException("Ledger entry currency {$entry->currency} does not match lease currency {$leaseCurrency}.");
+            }
+        });
+
+        static::deleted(function (LedgerEntry $entry) {
+            if ($entry->source_type === (new BankTransaction)->getMorphClass()) {
+                BankTransaction::whereKey($entry->source_id)->update([
+                    'status' => BankTransactionStatus::Review,
+                    'decided_by' => null,
+                    'decided_at' => null,
+                ]);
             }
         });
     }

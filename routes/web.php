@@ -13,6 +13,7 @@ Route::view('/', 'welcome')->name('home');
 Route::middleware(['auth'])->group(function () {
     Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
 
+    Route::livewire('wplaty', 'pages::payments.index')->name('payments.index');
     Route::livewire('rachunki', 'pages::bills.index')->name('bills.index');
     Route::livewire('rachunki/{bill}', 'pages::bills.edit')->middleware('can:update,bill')->name('bills.edit');
     Route::get('rachunki/{bill}/plik', function (Bill $bill) {

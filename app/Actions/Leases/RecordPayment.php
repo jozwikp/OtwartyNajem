@@ -8,10 +8,11 @@ use App\Models\Lease;
 use App\Models\LedgerEntry;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
 
 class RecordPayment
 {
-    public function handle(Lease $lease, User $user, int $amount, CarbonImmutable $paidOn, PaymentMethod $method, ?string $notes = null): LedgerEntry
+    public function handle(Lease $lease, User $user, int $amount, CarbonImmutable $paidOn, PaymentMethod $method, ?string $notes = null, ?Model $source = null): LedgerEntry
     {
         $entry = new LedgerEntry([
             'kind' => LedgerKind::Payment,
@@ -25,6 +26,12 @@ class RecordPayment
         ]);
 
         $entry->lease()->associate($lease);
+
+        if ($source) {
+            $entry->source()->associate($source);
+            $entry->description = __('Wpłata – przelew z wyciągu bankowego');
+        }
+
         $entry->save();
 
         return $entry;

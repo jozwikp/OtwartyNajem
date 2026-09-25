@@ -9,6 +9,7 @@
             $sidebarApartments = auth()->user()->apartments()->orderBy('label')->limit($sidebarLimit + 1)->get(['apartments.id', 'apartments.label']);
             $currentApartmentId = optional(request()->route('apartment'))->id;
             $billsToReview = \App\Models\Bill::visibleTo(auth()->user())->whereIn('status', ['review', 'failed'])->count();
+            $paymentsToReview = \App\Models\BankTransaction::where('user_id', auth()->id())->whereIn('status', ['suggested', 'review'])->count();
         @endphp
 
         <flux:sidebar sticky collapsible="mobile" class="border-e border-line bg-rail">
@@ -24,6 +25,10 @@
 
                 <flux:sidebar.item icon="building-office-2" :href="route('apartments.index')" :current="request()->routeIs('apartments.index')" wire:navigate>
                     {{ __('Wszystkie mieszkania') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="banknotes" :href="route('payments.index')" :current="request()->routeIs('payments.*')" :badge="$paymentsToReview ?: null" badge:color="amber" wire:navigate>
+                    {{ __('Wpłaty') }}
                 </flux:sidebar.item>
 
                 <flux:sidebar.item icon="receipt-percent" :href="route('bills.index')" :current="request()->routeIs('bills.*')" :badge="$billsToReview ?: null" badge:color="amber" wire:navigate>
