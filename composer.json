@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "jozwikp/spokojny-najem",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "SpokojnyNajem – proste zarządzanie mieszkaniami na wynajem: najmy, opłaty, rachunki odczytywane przez AI i powiadomienia dla najemców.",
     "keywords": [
         "laravel",
         "framework"
