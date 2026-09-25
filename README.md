@@ -225,3 +225,11 @@ Testy nie łączą się z OpenRouter ani nie wysyłają e-maili – odpowiedzi s
 - Saldo nie jest nigdzie przechowywane: to suma naliczeń minus suma wpłat z tabeli `ledger_entries`.
 - Logika biznesowa jest w `app/Actions`, odczyt faktur w `app/Services/BillReader.php`, odczyt wyciągów w `app/Services/BankStatementParser.php`, dopasowanie wpłat w `app/Support/PaymentMatcher.php`, ekrany w `resources/views/pages`.
 - Plik `.env` (klucze, hasła) nigdy nie trafia do repozytorium.
+
+## Licencja
+
+SpokojnyNajem jest udostępniony na licencji **MIT** – zobacz plik [LICENSE](LICENSE).
+
+W skrócie: możesz za darmo używać, zmieniać, rozpowszechniać i wykorzystywać kod komercyjnie (także we własnych produktach), pod warunkiem zachowania informacji o autorze i treści licencji. Oprogramowanie jest dostarczane „tak jak jest”, bez żadnych gwarancji – autor nie odpowiada za szkody wynikające z jego użycia, w tym za błędy w naliczeniach czy rozliczeniach.
+
+Licencja obejmuje kod. Nie daje prawa do posługiwania się nazwą „SpokojnyNajem” ani logo w sposób sugerujący, że Twoja wersja lub usługa pochodzi od autorów projektu.
