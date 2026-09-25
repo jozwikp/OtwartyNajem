@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "jozwikp/spokojny-najem",
+    "name": "jozwikp/otwarty-najem",
     "type": "project",
-    "description": "SpokojnyNajem – proste zarządzanie mieszkaniami na wynajem: najmy, opłaty, rachunki odczytywane przez AI i powiadomienia dla najemców.",
+    "description": "OtwartyNajem – proste zarządzanie mieszkaniami na wynajem: najmy, opłaty, rachunki odczytywane przez AI i powiadomienia dla najemców.",
     "keywords": [
         "laravel",
         "framework"

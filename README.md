@@ -1,8 +1,10 @@
-# SpokojnyNajem
+# OtwartyNajem
 
 Proste zarządzanie mieszkaniami na wynajem – dla ludzi, nie dla księgowych.
 
-SpokojnyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz faktury za media, system sam je odczytuje, przypisuje do właściwego mieszkania i dolicza najemcy. Wgrywasz wyciąg z banku, system sam rozpoznaje przelewy od najemców. Najemca raz dziennie dostaje e-mail z tym, co doszło i ile ma zapłacić.
+🌐 [otwartynajem.pl](https://otwartynajem.pl)
+
+OtwartyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz faktury za media, system sam je odczytuje, przypisuje do właściwego mieszkania i dolicza najemcy. Wgrywasz wyciąg z banku, system sam rozpoznaje przelewy od najemców. Najemca raz dziennie dostaje e-mail z tym, co doszło i ile ma zapłacić.
 
 ## Co potrafi
 
@@ -35,8 +37,8 @@ Najprościej na macOS/Windows: [Laravel Herd](https://herd.laravel.com) (ma PHP,
 ## Uruchomienie
 
 ```bash
-git clone https://github.com/jozwikp/SpokojnyNajem.git
-cd SpokojnyNajem
+git clone https://github.com/jozwikp/OtwartyNajem.git
+cd OtwartyNajem
 
 composer install
 npm install
@@ -228,8 +230,8 @@ Testy nie łączą się z OpenRouter ani nie wysyłają e-maili – odpowiedzi s
 
 ## Licencja
 
-SpokojnyNajem jest udostępniony na licencji **MIT** – zobacz plik [LICENSE](LICENSE).
+OtwartyNajem jest udostępniony na licencji **MIT** – zobacz plik [LICENSE](LICENSE).
 
 W skrócie: możesz za darmo używać, zmieniać, rozpowszechniać i wykorzystywać kod komercyjnie (także we własnych produktach), pod warunkiem zachowania informacji o autorze i treści licencji. Oprogramowanie jest dostarczane „tak jak jest”, bez żadnych gwarancji – autor nie odpowiada za szkody wynikające z jego użycia, w tym za błędy w naliczeniach czy rozliczeniach.
 
-Licencja obejmuje kod. Nie daje prawa do posługiwania się nazwą „SpokojnyNajem” ani logo w sposób sugerujący, że Twoja wersja lub usługa pochodzi od autorów projektu.
+Licencja obejmuje kod. Nie daje prawa do posługiwania się nazwą „OtwartyNajem” ani logo w sposób sugerujący, że Twoja wersja lub usługa pochodzi od autorów projektu.
