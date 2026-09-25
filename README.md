@@ -2,7 +2,7 @@
 
 Proste zarządzanie mieszkaniami na wynajem – dla ludzi, nie dla księgowych.
 
-SpokojnyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz faktury za media, system sam je odczytuje, przypisuje do właściwego mieszkania i dolicza najemcy. Najemca raz dziennie dostaje e-mail z tym, co doszło i ile ma zapłacić.
+SpokojnyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz faktury za media, system sam je odczytuje, przypisuje do właściwego mieszkania i dolicza najemcy. Wgrywasz wyciąg z banku, system sam rozpoznaje przelewy od najemców. Najemca raz dziennie dostaje e-mail z tym, co doszło i ile ma zapłacić.
 
 ## Co potrafi
 
@@ -10,6 +10,9 @@ SpokojnyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz
 - **Najem** – najemcy (imię, nazwisko, e-mail, telefon), okres umowy, numer konta, waluta, kaucja (wraz ze zwrotem i powodem potrąceń).
 - **Stałe opłaty** – opłata za mieszkanie, do administracji/wspólnoty, inne. Naliczane automatycznie co miesiąc (1. dnia), za niepełny miesiąc proporcjonalnie do dni. Kwoty mogą się zmieniać w czasie (np. podwyżka od listopada), nigdy wstecz.
 - **Rachunki z AI** – wgrywasz naraz wiele faktur (PDF lub zdjęcia). Model AI odczytuje kwotę, daty, okres, dostawcę i dopasowuje fakturę do mieszkania – także gdy adres jest zapisany inaczej („m. 5” = „/5”, brak polskich znaków, skróty ulic). Ty tylko klikasz **Zatwierdź** albo **Popraw**.
+- **Wpłaty** – dwie drogi:
+  - **ręcznie**: wybierasz najemcę (system podpowiada, ile ma do zapłaty), wpisujesz kwotę i datę;
+  - **z wyciągu bankowego (CSV)**: wgrywasz plik z bankowości internetowej (mBank, PKO BP i podobne układy), system bierze tylko wpływy i sam dopasowuje je do najemców – po imieniu i nazwisku w nadawcy lub tytule (bez względu na kolejność i polskie znaki), po adresie mieszkania, kwocie należności i po kontach, z których już wcześniej płacono (np. rodzic płacący za najemcę). Pewne wpłaty są od razu zaznaczone, wątpliwe czekają na Twoją decyzję, a Ty jednym kliknięciem księgujesz wszystko naraz.
 - **Rozliczenia** – jedno saldo na najem: wpłaty zawsze pokrywają najpierw najstarsze opłaty. Widać, co opłacone, co po terminie i ile zostało do zapłaty.
 - **Powiadomienia dla najemców** – jeden e-mail dziennie po 16:00 (tylko gdy coś doszło): nowe opłaty, zmienione kwoty, otrzymane wpłaty, saldo i dane do przelewu. Właściciele dostają kopię.
 - **Historia zmian** – każda operacja jest zapisana: kto, kiedy, co zmienił (z wartościami przed i po), z jakiego IP. Także automatyczne naliczenia i wysłane e-maile.
@@ -76,10 +79,31 @@ Dwie rzeczy dzieją się automatycznie i wymagają działających procesów:
 
 Opłaty stałe dopisują się też same przy wejściu w zakładkę **Rozliczenia**, więc nic nie zginie, nawet gdy harmonogram chwilowo nie działa.
 
+## Import wyciągów bankowych
+
+1. W bankowości internetowej wyeksportuj historię operacji do pliku **CSV** (np. mBank: *Historia → Eksportuj → CSV*).
+2. W aplikacji wejdź w **Wpłaty** i wybierz plik.
+3. Sprawdź listę i kliknij **Zaksięguj zaznaczone**.
+
+Warto wiedzieć:
+
+- **Sam plik nie jest zapisywany.** Z wyciągu zostają tylko wpływy – Twoje wydatki są pomijane.
+- **Ten sam przelew nigdy nie zostanie zaksięgowany dwa razy.** Możesz wgrywać wyciągi nachodzące na siebie (np. sierpień–wrzesień, a potem wrzesień–październik) – dojdą tylko nowe przelewy.
+- **Niezałatwione przelewy czekają**, aż je zaksięgujesz albo oznaczysz „To nie od najemcy”. Licznik przy pozycji *Wpłaty* w menu pokazuje, ile ich jest.
+- **System uczy się płatników.** Po pierwszym zaksięgowaniu przelewu z danego konta kolejne przelewy z niego rozpoznają się same, nawet bez nazwiska najemcy w tytule.
+- **Kaucje** są oznaczane do decyzji – kaucja nie jest wliczana do rozliczeń najmu.
+- Dopasowanie odbywa się **lokalnie, bez AI** – wyciąg nie jest nigdzie wysyłany.
+
 ## Testy
 
 ```bash
 php artisan test
+```
+
+Pełne sprawdzenie – formatowanie kodu (Pint), analiza typów (PHPStan) i testy – tak jak na GitHubie:
+
+```bash
+composer test
 ```
 
 Testy nie łączą się z OpenRouter ani nie wysyłają e-maili – odpowiedzi są symulowane.
@@ -88,5 +112,5 @@ Testy nie łączą się z OpenRouter ani nie wysyłają e-maili – odpowiedzi s
 
 - Kwoty są zapisywane w groszach (liczby całkowite), zawsze w walucie najmu – system nie przyjmie operacji w innej walucie.
 - Saldo nie jest nigdzie przechowywane: to suma naliczeń minus suma wpłat z tabeli `ledger_entries`.
-- Logika biznesowa jest w `app/Actions`, odczyt faktur w `app/Services/BillReader.php`, ekrany w `resources/views/pages`.
+- Logika biznesowa jest w `app/Actions`, odczyt faktur w `app/Services/BillReader.php`, odczyt wyciągów w `app/Services/BankStatementParser.php`, dopasowanie wpłat w `app/Support/PaymentMatcher.php`, ekrany w `resources/views/pages`.
 - Plik `.env` (klucze, hasła) nigdy nie trafia do repozytorium.
