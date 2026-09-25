@@ -627,7 +627,7 @@ new #[Title('Najem')] class extends Component {
                         <flux:input wire:model="tenantFirstName" :label="__('Imię')" />
                         <flux:input wire:model="tenantLastName" :label="__('Nazwisko')" />
                         <flux:input wire:model="tenantEmail" type="email" :label="__('E-mail')" :badge="__('Opcjonalnie')" />
-                        <flux:input wire:model="tenantPhone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" />
+                        <flux:input wire:model="tenantPhone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" :description="__('Nie jest potrzebny do działania aplikacji.')" />
                     </div>
                     <div class="flex justify-end gap-2">
                         <flux:modal.close><flux:button variant="ghost">{{ __('Anuluj') }}</flux:button></flux:modal.close>

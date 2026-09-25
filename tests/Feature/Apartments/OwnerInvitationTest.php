@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\ApartmentInvitation;
 use App\Models\User;
@@ -8,7 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
-use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);
 

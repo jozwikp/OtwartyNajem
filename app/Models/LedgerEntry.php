@@ -70,6 +70,7 @@ class LedgerEntry extends Model implements BelongsToApartment
             'kind' => LedgerKind::class,
             'payment_method' => PaymentMethod::class,
             'amount' => 'integer',
+            'notes' => 'encrypted',
             'booked_on' => 'immutable_date',
             'due_on' => 'immutable_date',
             'period' => 'immutable_date',

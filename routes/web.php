@@ -4,9 +4,11 @@ use App\Mail\TenantDigestMail;
 use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\Lease;
+use App\Support\EncryptedFiles;
 use App\Support\TenantDigest;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -17,7 +19,11 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('rachunki', 'pages::bills.index')->name('bills.index');
     Route::livewire('rachunki/{bill}', 'pages::bills.edit')->middleware('can:update,bill')->name('bills.edit');
     Route::get('rachunki/{bill}/plik', function (Bill $bill) {
-        return Storage::disk('local')->response($bill->file_path, $bill->file_name);
+        return response(EncryptedFiles::get($bill->file_path), 200, [
+            'Content-Type' => $bill->file_mime ?? 'application/octet-stream',
+            'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_INLINE, $bill->file_name, Str::ascii($bill->file_name)),
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     })->middleware('can:view,bill')->name('bills.file');
 
     Route::livewire('mieszkania', 'pages::apartments.index')->name('apartments.index');

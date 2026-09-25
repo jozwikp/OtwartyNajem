@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Spatie\Activitylog\Models\Activity;
+use App\Models\Activity;
 
 new #[Title('Pulpit')] class extends Component {
     #[Computed]
@@ -32,7 +32,7 @@ new #[Title('Pulpit')] class extends Component {
         return Activity::query()
             ->where(fn ($query) => $query
                 ->where(fn ($q) => $q->where('subject_type', (new Apartment)->getMorphClass())->whereIn('subject_id', $apartmentIds))
-                ->orWhereIn('properties->apartment_id', $apartmentIds))
+                ->orWhereIn('apartment_id', $apartmentIds))
             ->with(['causer', 'subject'])
             ->latest('id')
             ->limit(8)

@@ -5,7 +5,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Activitylog\Models\Activity;
+use App\Models\Activity;
 
 new #[Title('Historia zmian')] class extends Component {
     use WithPagination;
@@ -23,7 +23,7 @@ new #[Title('Historia zmian')] class extends Component {
         return Activity::query()
             ->where(fn ($query) => $query
                 ->where(fn ($q) => $q->where('subject_type', $this->apartment->getMorphClass())->where('subject_id', $this->apartment->id))
-                ->orWhere('properties->apartment_id', $this->apartment->id))
+                ->orWhere('apartment_id', $this->apartment->id))
             ->with(['causer', 'subject'])
             ->latest('id')
             ->paginate(20);

@@ -6,6 +6,7 @@ use App\Enums\BillStatus;
 use App\Jobs\ReadBill;
 use App\Models\Bill;
 use App\Models\User;
+use App\Support\EncryptedFiles;
 use Illuminate\Http\UploadedFile;
 
 class UploadBills
@@ -23,7 +24,7 @@ class UploadBills
         foreach ($files as $file) {
             $bill = Bill::create([
                 'status' => BillStatus::Queued,
-                'file_path' => $file->store("bills/{$user->id}", 'local'),
+                'file_path' => EncryptedFiles::store($file, "bills/{$user->id}"),
                 'file_name' => $file->getClientOriginalName(),
                 'file_mime' => $file->getMimeType(),
                 'created_by' => $user->id,

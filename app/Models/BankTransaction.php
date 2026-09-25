@@ -42,6 +42,10 @@ class BankTransaction extends Model
         return [
             'booked_on' => 'immutable_date',
             'amount' => 'integer',
+            'description' => 'encrypted',
+            'sender_name' => 'encrypted',
+            'sender_account' => 'encrypted',
+            'title' => 'encrypted',
             'status' => BankTransactionStatus::class,
             'decided_at' => 'immutable_datetime',
         ];

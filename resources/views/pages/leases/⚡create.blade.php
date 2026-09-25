@@ -216,7 +216,7 @@ new #[Title('Nowy najem')] class extends Component {
                                     <flux:input wire:model="tenants.{{ $index }}.first_name" :label="__('Imię')" autocomplete="off" />
                                     <flux:input wire:model="tenants.{{ $index }}.last_name" :label="__('Nazwisko')" autocomplete="off" />
                                     <flux:input wire:model="tenants.{{ $index }}.email" type="email" :label="__('E-mail')" :badge="__('Opcjonalnie')" autocomplete="off" />
-                                    <flux:input wire:model="tenants.{{ $index }}.phone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" autocomplete="off" />
+                                    <flux:input wire:model="tenants.{{ $index }}.phone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" :description="__('Nie jest potrzebny do działania aplikacji.')" autocomplete="off" />
                                 </div>
                             </div>
                         @endforeach

@@ -1,10 +1,10 @@
 <?php
 
+use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);
 

@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Enums\BillCategory;
 use App\Models\Apartment;
+use App\Support\EncryptedFiles;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use JsonException;
 use RuntimeException;
 
@@ -82,7 +82,7 @@ class BillReader
      */
     protected function filePart(string $path, string $mime, string $fileName): array
     {
-        $data = 'data:'.$mime.';base64,'.base64_encode(Storage::disk('local')->get($path));
+        $data = 'data:'.$mime.';base64,'.base64_encode(EncryptedFiles::get($path));
 
         return $mime === 'application/pdf'
             ? ['type' => 'file', 'file' => ['filename' => $fileName, 'file_data' => $data]]

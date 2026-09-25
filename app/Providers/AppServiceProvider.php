@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\BelongsToApartment;
+use App\Models\Activity;
 use App\Models\User;
 use App\Support\Audit;
 use Carbon\CarbonImmutable;
@@ -14,7 +15,6 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
-use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
             // Lease, bill, payment… changes also show up in the apartment's history.
             $subject = $activity->subject;
             if ($subject instanceof BelongsToApartment) {
+                $activity->apartment_id = $subject->auditApartmentId();
                 $context['apartment_id'] = $subject->auditApartmentId();
                 $context['currency'] = $subject->auditCurrency();
             }

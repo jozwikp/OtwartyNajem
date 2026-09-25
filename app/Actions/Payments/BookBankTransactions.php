@@ -63,8 +63,8 @@ class BookBankTransactions
                     'decided_at' => now(),
                 ])->save();
 
-                if ($transaction->sender_account) {
-                    $lease->payers()->firstOrCreate(['account' => $transaction->sender_account], ['name' => $transaction->sender_name]);
+                if ($transaction->sender_account && ! $lease->payers()->forAccount($transaction->sender_account)->exists()) {
+                    $lease->payers()->create(['account' => $transaction->sender_account, 'name' => $transaction->sender_name]);
                 }
 
                 $booked++;

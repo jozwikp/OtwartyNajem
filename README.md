@@ -94,6 +94,20 @@ Warto wiedzieć:
 - **Kaucje** są oznaczane do decyzji – kaucja nie jest wliczana do rozliczeń najmu.
 - Dopasowanie odbywa się **lokalnie, bez AI** – wyciąg nie jest nigdzie wysyłany.
 
+## Ochrona danych osobowych
+
+Dane osobowe są **szyfrowane w bazie** kluczem aplikacji (`APP_KEY`, algorytm AES-256):
+
+- najemcy – imię, nazwisko, e-mail, telefon (telefon jest opcjonalny),
+- numery kont bankowych (najmu i zapamiętanych płatników), notatki i uwagi,
+- wpływy z wyciągów – nadawca, konto, tytuł, opis,
+- to, co AI odczytało z faktur, oraz cała historia zmian,
+- **pliki faktur** na dysku.
+
+Kradzież samej bazy albo kopii zapasowej nie ujawnia tych danych. Aplikacja odszyfrowuje je w locie, więc wszystkie funkcje działają normalnie. Jawne pozostają e-maile kont właścicieli (potrzebne do logowania) i adresy mieszkań (wyszukiwanie).
+
+> **Klucz `APP_KEY` jest jedynym sposobem odczytania danych.** Zapisz go w bezpiecznym miejscu (np. menedżer haseł) **osobno od kopii zapasowych bazy**. Utrata klucza = utrata danych. Nie zmieniaj go ręcznie – do wymiany klucza służy `APP_PREVIOUS_KEYS` (stary klucz dalej odczytuje dane).
+
 ## Testy
 
 ```bash

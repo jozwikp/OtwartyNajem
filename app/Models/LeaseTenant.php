@@ -30,7 +30,13 @@ class LeaseTenant extends Model implements BelongsToApartment
 
     protected function casts(): array
     {
-        return ['is_primary' => 'boolean'];
+        return [
+            'first_name' => 'encrypted',
+            'last_name' => 'encrypted',
+            'email' => 'encrypted',
+            'phone' => 'encrypted',
+            'is_primary' => 'boolean',
+        ];
     }
 
     public function auditApartmentId(): ?int

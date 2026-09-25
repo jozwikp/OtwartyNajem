@@ -7,6 +7,7 @@ use App\Enums\BillStatus;
 use App\Enums\ChargeType;
 use App\Enums\PaymentMethod;
 use App\Mail\TenantDigestMail;
+use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\Lease;
@@ -17,7 +18,6 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
-use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);
 

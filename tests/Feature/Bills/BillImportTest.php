@@ -3,6 +3,7 @@
 use App\Actions\Leases\CreateLease;
 use App\Enums\BillStatus;
 use App\Enums\ChargeType;
+use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\User;
@@ -14,7 +15,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);
 

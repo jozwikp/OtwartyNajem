@@ -6,6 +6,7 @@ use App\Enums\BillCategory;
 use App\Enums\BillStatus;
 use App\Enums\ChargeType;
 use App\Enums\PaymentMethod;
+use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\Lease;
@@ -14,7 +15,6 @@ use App\Models\RecurringChargeRate;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Number;
-use Spatie\Activitylog\Models\Activity;
 
 /**
  * Turns raw activity log entries into plain Polish sentences for the change history.

@@ -62,7 +62,7 @@ class Bill extends Model implements BelongsToApartment
             'due_on' => 'immutable_date',
             'total_amount' => 'integer',
             'tenant_amount' => 'integer',
-            'ai_result' => 'array',
+            'ai_result' => 'encrypted:array',
             'processed_at' => 'immutable_datetime',
             'approved_at' => 'immutable_datetime',
         ];
