@@ -18,9 +18,10 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 new #[Title('Rachunki')] class extends Component {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $uploads = [];
@@ -55,9 +56,26 @@ new #[Title('Rachunki')] class extends Component {
         return $this->bills()
             ->where('status', BillStatus::Approved)
             ->when($this->apartmentFilter !== '', fn ($q) => $q->where('apartment_id', $this->apartmentFilter))
-            ->latest('approved_at')
-            ->limit(50)
-            ->get();
+            ->orderByRaw('coalesce(period_to, issued_on, approved_at) desc')
+            ->orderByDesc('id')
+            ->paginate(20, pageName: 'strona');
+    }
+
+    /**
+     * The approved bills on the current page, grouped by the month they are for.
+     *
+     * @return \Illuminate\Support\Collection<string, \Illuminate\Support\Collection<int, Bill>>
+     */
+    #[Computed]
+    public function approvedByMonth()
+    {
+        return collect($this->approved->items())
+            ->groupBy(fn (Bill $bill) => ($bill->period_to ?? $bill->issued_on ?? $bill->approved_at)?->format('Y-m') ?? '');
+    }
+
+    public function updatedApartmentFilter(): void
+    {
+        $this->resetPage('strona');
     }
 
     #[Computed]
@@ -369,8 +387,19 @@ new #[Title('Rachunki')] class extends Component {
         @if ($this->approved->isEmpty())
             <flux:text>{{ __('Nie ma jeszcze zatwierdzonych rachunków.') }}</flux:text>
         @else
+            <div class="space-y-6">
+            @foreach ($this->approvedByMonth as $month => $bills)
+                @php $currencies = $bills->pluck('currency')->unique(); @endphp
+                <div wire:key="month-{{ $month }}">
+                    <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2 px-1">
+                        <flux:heading>{{ $month !== '' ? \Illuminate\Support\Str::ucfirst(\Carbon\CarbonImmutable::parse($month.'-01')->isoFormat('MMMM YYYY')) : __('Bez daty') }}</flux:heading>
+                        <flux:text class="text-sm">
+                            {{ trans_choice(':count rachunek|:count rachunki|:count rachunków', $bills->count()) }}
+                            @if ($currencies->count() === 1) · {{ __('razem :amount', ['amount' => $fmt((int) $bills->sum('tenant_amount'), $currencies->first())]) }} @endif
+                        </flux:text>
+                    </div>
             <ul class="divide-y divide-line rounded-2xl border border-line bg-card">
-                @foreach ($this->approved as $bill)
+                @foreach ($bills as $bill)
                     <li wire:key="approved-{{ $bill->id }}">
                         <a href="{{ route('bills.edit', $bill) }}" wire:navigate class="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-tray">
                             <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-badge">
@@ -390,6 +419,13 @@ new #[Title('Rachunki')] class extends Component {
                     </li>
                 @endforeach
             </ul>
+                </div>
+            @endforeach
+            </div>
+
+            <div class="mt-6">
+                <flux:pagination :paginator="$this->approved" />
+            </div>
         @endif
     </section>
 

@@ -100,3 +100,22 @@ test('steps are validated and only own apartments can be chosen', function () {
     // A foreign apartment in the link is ignored.
     Livewire::test('pages::bills.create', ['apartmentId' => (string) $foreign->id])->assertSet('apartmentId', '');
 });
+
+test('approved bills are grouped by month and paginated by 20', function () {
+    foreach (range(1, 25) as $i) {
+        $month = CarbonImmutable::parse('2026-01-01')->addMonths(intdiv($i - 1, 3));
+        $bill = Bill::create(['status' => BillStatus::Approved, 'created_by' => $this->owner->id, 'category' => 'water', 'supplier' => "Dostawca {$i}", 'currency' => 'PLN', 'total_amount' => 1000, 'tenant_amount' => 1000]);
+        $bill->forceFill(['apartment_id' => $this->apartment->id, 'period_from' => $month, 'period_to' => $month->endOfMonth()->startOfDay(), 'issued_on' => $month, 'due_on' => $month])->saveQuietly();
+    }
+
+    Livewire::test('pages::bills.index')
+        ->assertSee('Dostawca 25')        // newest month first
+        ->assertSee('Wrzesień 2026', false)
+        ->assertSee('1 rachunek')
+        ->assertDontSee('Dostawca 5 ')
+        ->assertSee('Wyświetlanie')
+        ->call('nextPage', 'strona')
+        ->assertSee('Dostawca 1')
+        ->assertSee('Styczeń 2026', false)
+        ->assertDontSee('Dostawca 25');
+});
