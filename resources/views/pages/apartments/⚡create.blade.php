@@ -117,7 +117,7 @@ new #[Title('Dodaj mieszkanie')] class extends Component {
                     <div class="flex items-start justify-between gap-4 p-4">
                         <div>
                             <flux:text class="text-sm">{{ __('Metraż') }}</flux:text>
-                            <div class="mt-1 font-medium">{{ \Illuminate\Support\Number::format((float) $form->area, maxPrecision: 2, locale: 'pl') }} m²</div>
+                            <div class="mt-1 font-medium">{{ \Illuminate\Support\Number::format((float) $form->area, maxPrecision: 2, locale: app()->getLocale()) }} m²</div>
                         </div>
                         <flux:button size="sm" variant="ghost" wire:click="goTo(2)">{{ __('Zmień') }}</flux:button>
                     </div>

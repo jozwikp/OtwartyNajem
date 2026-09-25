@@ -12,15 +12,20 @@ class Countries
      */
     public const PINNED = ['PL', 'DE', 'CZ', 'SK', 'LT', 'UA', 'GB'];
 
+    /** @var array<string, array<string, string>> */
+    protected static array $cache = [];
+
     /**
-     * All countries as ISO code => Polish name, pinned ones first.
+     * All countries as ISO code => name in the interface language, pinned ones first.
      *
      * @return array<string, string>
      */
     public static function all(): array
     {
-        return once(function () {
-            $bundle = ResourceBundle::create('pl', 'ICUDATA-region');
+        $locale = app()->getLocale();
+
+        return static::$cache[$locale] ??= (function () use ($locale) {
+            $bundle = ResourceBundle::create($locale, 'ICUDATA-region');
             $countries = [];
 
             foreach ($bundle['Countries'] as $code => $name) {
@@ -29,7 +34,7 @@ class Countries
                 }
             }
 
-            (new Collator('pl_PL'))->asort($countries);
+            (new Collator($locale))->asort($countries);
 
             $pinned = [];
 
@@ -38,7 +43,7 @@ class Countries
             }
 
             return $pinned + $countries;
-        });
+        })();
     }
 
     public static function name(?string $code): string

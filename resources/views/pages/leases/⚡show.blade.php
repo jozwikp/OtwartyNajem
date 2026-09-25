@@ -89,7 +89,7 @@ new #[Title('Najem')] class extends Component {
         $options = [];
         for ($i = 0; $i < 12; $i++) {
             $month = $from->addMonths($i);
-            $options[$month->toDateString()] = $month->locale('pl')->isoFormat('MMMM YYYY');
+            $options[$month->toDateString()] = $month->isoFormat('MMMM YYYY');
         }
 
         return $options;

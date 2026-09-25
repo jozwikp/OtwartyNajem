@@ -39,7 +39,7 @@ class Currencies
     public static function symbol(string $currency): string
     {
         return match ($currency) {
-            'PLN' => 'zł',
+            'PLN' => app()->getLocale() === 'pl' ? 'zł' : 'PLN',
             'EUR' => '€',
             'USD' => '$',
             'GBP' => '£',

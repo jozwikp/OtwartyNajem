@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Actions\Bills\SyncBillCharge;
+use App\Actions\Leases\AccrueRecurringCharges;
 use App\Contracts\BelongsToApartment;
 use App\Enums\BankTransactionStatus;
 use App\Enums\LedgerKind;
@@ -108,6 +110,33 @@ class LedgerEntry extends Model implements BelongsToApartment
     public function source(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * The description in the viewer's language, built from what the entry is for.
+     * The stored description (in the language it was created in) is the fallback.
+     */
+    public function displayDescription(): string
+    {
+        $source = $this->source;
+
+        if ($source instanceof RecurringCharge && $this->period) {
+            $line = app(AccrueRecurringCharges::class)->lineFor($this->lease, $source, $this->period);
+
+            return $line['description'] ?? $this->description;
+        }
+
+        if ($source instanceof Bill) {
+            return SyncBillCharge::describe($source);
+        }
+
+        if ($this->isPayment()) {
+            return $source instanceof BankTransaction
+                ? __('Wpłata – przelew z wyciągu bankowego')
+                : __('Wpłata – :method', ['method' => mb_strtolower($this->payment_method?->label() ?? '')]);
+        }
+
+        return $this->description;
     }
 
     public function isCharge(): bool

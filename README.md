@@ -19,7 +19,7 @@ OtwartyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz 
 - **Powiadomienia dla najemców** – jeden e-mail dziennie po 16:00 (tylko gdy coś doszło): nowe opłaty, zmienione kwoty, otrzymane wpłaty, saldo i dane do przelewu. Właściciele dostają kopię.
 - **Historia zmian** – każda operacja jest zapisana: kto, kiedy, co zmienił (z wartościami przed i po), z jakiego IP. Także automatyczne naliczenia i wysłane e-maile.
 
-Cały interfejs jest po polsku, trudniejsze operacje są podzielone na krótkie kroki.
+Interfejs jest **po polsku i po angielsku** – każdy użytkownik wybiera język w *Ustawienia → Wygląd i język* (goście dostają język przeglądarki). Trudniejsze operacje są podzielone na krótkie kroki. E-maile do najemców są wysyłane po polsku.
 
 ## Technologia
 
@@ -227,6 +227,7 @@ Testy nie łączą się z OpenRouter ani nie wysyłają e-maili – odpowiedzi s
 - Saldo nie jest nigdzie przechowywane: to suma naliczeń minus suma wpłat z tabeli `ledger_entries`.
 - Logika biznesowa jest w `app/Actions`, odczyt faktur w `app/Services/BillReader.php`, odczyt wyciągów w `app/Services/BankStatementParser.php`, dopasowanie wpłat w `app/Support/PaymentMatcher.php`, ekrany w `resources/views/pages`.
 - Plik `.env` (klucze, hasła) nigdy nie trafia do repozytorium.
+- Teksty interfejsu są w kodzie po polsku (`__('Zapisz')`), tłumaczenia angielskie w `lang/en.json`. Teksty starter kita mają klucze angielskie z tłumaczeniem w `lang/pl.json`. Nowy tekst w kodzie = nowa pozycja w `lang/en.json` (test sprawdza, że na angielskich ekranach nie zostało nic po polsku).
 
 ## Licencja
 

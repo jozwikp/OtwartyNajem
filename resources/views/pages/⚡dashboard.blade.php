@@ -21,7 +21,7 @@ new #[Title('Pulpit')] class extends Component {
     {
         $area = (float) Apartment::ownedBy(Auth::user())->sum('area');
 
-        return Number::format($area, maxPrecision: 2, locale: 'pl').' m²';
+        return Number::format($area, maxPrecision: 2, locale: app()->getLocale()).' m²';
     }
 
     #[Computed]

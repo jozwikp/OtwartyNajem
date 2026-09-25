@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
             Route::livewire('najmy/{lease}', 'pages::leases.show')->name('leases.show');
             Route::livewire('najmy/{lease}/edytuj', 'pages::leases.edit')->name('leases.edit');
             Route::livewire('najmy/{lease}/rozliczenia', 'pages::leases.ledger')->name('leases.ledger');
-            Route::get('najmy/{lease}/powiadomienie', fn (Apartment $apartment, Lease $lease) => new TenantDigestMail(new TenantDigest($lease)))
+            Route::get('najmy/{lease}/powiadomienie', fn (Apartment $apartment, Lease $lease) => (new TenantDigestMail(new TenantDigest($lease)))->locale('pl'))
                 ->name('leases.notification-preview');
         });
     });

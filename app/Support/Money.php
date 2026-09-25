@@ -35,13 +35,24 @@ class Money
 
     public static function format(int $amount, string $currency): string
     {
-        $formatter = new NumberFormatter('pl_PL', NumberFormatter::CURRENCY);
+        $formatter = new NumberFormatter(static::numberLocale(), NumberFormatter::CURRENCY);
 
         if ($amount % 100 === 0) {
             $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
         }
 
         return (string) $formatter->formatCurrency($amount / 100, $currency);
+    }
+
+    /**
+     * ICU locale for number formatting in the interface language.
+     */
+    public static function numberLocale(): string
+    {
+        return match (app()->getLocale()) {
+            'en' => 'en_GB',
+            default => 'pl_PL',
+        };
     }
 
     /**

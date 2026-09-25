@@ -15,7 +15,7 @@ Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
 | Za co | Kwota | Termin |
 |:--|--:|--:|
 @foreach ($digest->newCharges as $charge)
-| {{ $charge->description }} | {{ $digest->money($charge->amount) }} | {{ $charge->due_on?->format('d.m.Y') ?? '—' }} |
+| {{ $charge->displayDescription() }} | {{ $digest->money($charge->amount) }} | {{ $charge->due_on?->format('d.m.Y') ?? '—' }} |
 @endforeach
 </x-mail::table>
 @endif
@@ -27,7 +27,7 @@ Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
 | Za co | Było | Jest |
 |:--|--:|--:|
 @foreach ($digest->changedCharges as $charge)
-| {{ $charge->description }} | {{ $digest->money($charge->notified_amount) }} | **{{ $digest->money($charge->amount) }}** |
+| {{ $charge->displayDescription() }} | {{ $digest->money($charge->notified_amount) }} | **{{ $digest->money($charge->amount) }}** |
 @endforeach
 </x-mail::table>
 @endif

@@ -203,6 +203,6 @@ class Apartment extends Model
      */
     protected function areaFormatted(): Attribute
     {
-        return Attribute::get(fn (): string => Number::format((float) $this->area, maxPrecision: 2, locale: 'pl').' m²');
+        return Attribute::get(fn (): string => Number::format((float) $this->area, maxPrecision: 2, locale: app()->getLocale()).' m²');
     }
 }

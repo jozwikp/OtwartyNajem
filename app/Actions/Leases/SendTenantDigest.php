@@ -30,7 +30,7 @@ class SendTenantDigest
         $ownerEmails = $lease->apartment->owners->pluck('email')->filter()->unique()->values()->all();
 
         // Owners always get a copy of what their tenant was told.
-        Mail::to($lease->tenantEmails())->cc($ownerEmails)->send(new TenantDigestMail($digest));
+        Mail::to($lease->tenantEmails())->cc($ownerEmails)->locale('pl')->send(new TenantDigestMail($digest));
 
         DB::transaction(function () use ($lease, $digest, $ownerEmails) {
             $digest->markAsSent();

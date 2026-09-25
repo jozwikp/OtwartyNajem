@@ -11,6 +11,7 @@ use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\Lease;
 use App\Models\LeaseTenant;
+use App\Models\LedgerEntry;
 use App\Models\RecurringChargeRate;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -117,8 +118,8 @@ class ActivityPresenter
 
             'ledger_entries.created' => $this->attribute('kind') === 'payment'
                 ? __('Zapisano wpłatę: :amount', ['amount' => $this->formatValue('amount', $this->attribute('amount'))])
-                : __('Naliczono: :description – :amount', ['description' => $this->attribute('description'), 'amount' => $this->formatValue('amount', $this->attribute('amount'))]),
-            'ledger_entries.updated' => __('Przeliczono: :description', ['description' => $this->attribute('description')]),
+                : __('Naliczono: :description – :amount', ['description' => $this->ledgerDescription(), 'amount' => $this->formatValue('amount', $this->attribute('amount'))]),
+            'ledger_entries.updated' => __('Przeliczono: :description', ['description' => $this->ledgerDescription()]),
             'ledger_entries.deleted' => $this->attribute('kind') === 'payment'
                 ? __('Usunięto wpłatę: :amount', ['amount' => $this->formatValue('amount', $this->attribute('amount'))])
                 : __('Usunięto naliczenie: :description', ['description' => $this->attribute('description')]),
@@ -233,6 +234,16 @@ class ActivityPresenter
         return $value instanceof \BackedEnum ? $value->value : $value;
     }
 
+    /**
+     * The charge description in the viewer's language (while the entry still exists).
+     */
+    protected function ledgerDescription(): string
+    {
+        $subject = $this->activity->subject;
+
+        return $subject instanceof LedgerEntry ? $subject->displayDescription() : (string) $this->attribute('description');
+    }
+
     protected function tenantName(): string
     {
         $subject = $this->activity->subject;
@@ -281,7 +292,7 @@ class ActivityPresenter
 
         return match (true) {
             $attribute === 'country_code' => Countries::name($value),
-            $attribute === 'area' => Number::format((float) $value, maxPrecision: 2, locale: 'pl').' m²',
+            $attribute === 'area' => Number::format((float) $value, maxPrecision: 2, locale: app()->getLocale()).' m²',
             in_array($attribute, self::MONEY_ATTRIBUTES, true) => Money::format((int) $value, $currency),
             in_array($attribute, self::DATE_ATTRIBUTES, true) => $this->date($value)->format('d.m.Y'),
             $attribute === 'category' => BillCategory::tryFrom($value)?->label() ?? (string) $value,

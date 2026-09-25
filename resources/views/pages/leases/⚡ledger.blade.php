@@ -233,7 +233,7 @@ new #[Title('Rozliczenia')] class extends Component {
                                             <flux:icon :name="$bill ? $bill->category->icon() : 'home-modern'" variant="micro" class="text-accent-content" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <div class="text-sm font-medium">{{ $charge->description }}</div>
+                                            <div class="text-sm font-medium">{{ $charge->displayDescription() }}</div>
                                             <flux:text class="text-xs">
                                                 @if ($charge->due_on) {{ __('termin: :date', ['date' => $charge->due_on->format('d.m.Y')]) }} @endif
                                                 @if ($bill)
@@ -268,7 +268,7 @@ new #[Title('Rozliczenia')] class extends Component {
                                             <flux:icon.arrow-down-left variant="micro" class="text-green-700 dark:text-green-400" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <div class="text-sm font-medium">{{ $payment->description }}</div>
+                                            <div class="text-sm font-medium">{{ $payment->displayDescription() }}</div>
                                             <flux:text class="text-xs">
                                                 {{ $payment->booked_on->format('d.m.Y') }}
                                                 @if ($payment->notes) · {{ $payment->notes }} @endif
