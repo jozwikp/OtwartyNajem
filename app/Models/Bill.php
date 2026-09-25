@@ -32,8 +32,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $total_amount
  * @property int|null $tenant_amount
  * @property CarbonImmutable|null $due_on
- * @property string $file_path
- * @property string $file_name
+ * @property string|null $file_path
+ * @property string|null $file_name
  * @property string|null $file_mime
  * @property array<string, mixed>|null $ai_result
  * @property string|null $ai_error
@@ -151,6 +151,14 @@ class Bill extends Model implements BelongsToApartment
     public function isPartial(): bool
     {
         return $this->tenant_amount !== null && $this->tenant_amount !== $this->total_amount;
+    }
+
+    /**
+     * Bills entered by hand have no invoice file.
+     */
+    public function hasFile(): bool
+    {
+        return filled($this->file_path);
     }
 
     public function isImage(): bool

@@ -131,7 +131,7 @@ new #[Title('Rachunek')] class extends Component {
 <div class="mx-auto w-full max-w-6xl">
     <flux:breadcrumbs class="mb-4">
         <flux:breadcrumbs.item :href="route('bills.index')" wire:navigate>{{ __('Rachunki') }}</flux:breadcrumbs.item>
-        <flux:breadcrumbs.item>{{ $bill->file_name }}</flux:breadcrumbs.item>
+        <flux:breadcrumbs.item>{{ $bill->file_name ?? __('Rachunek dodany ręcznie') }}</flux:breadcrumbs.item>
     </flux:breadcrumbs>
 
     <div class="mb-6 flex flex-wrap items-center gap-3">
@@ -139,7 +139,7 @@ new #[Title('Rachunek')] class extends Component {
         <flux:badge :color="$approved ? 'green' : 'amber'">{{ $bill->status->label() }}</flux:badge>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
+    <div @class(['grid gap-6', 'lg:grid-cols-2' => $bill->hasFile(), 'max-w-2xl' => ! $bill->hasFile()])>
         <form wire:submit="save" class="space-y-6">
             @if ($bill->ai_result)
                 <div class="rounded-xl border border-line bg-badge/60 p-4 text-sm">
@@ -218,6 +218,7 @@ new #[Title('Rachunek')] class extends Component {
             </div>
         </form>
 
+        @if ($bill->hasFile())
         <div class="lg:sticky lg:top-6 lg:self-start">
             <div class="overflow-hidden rounded-2xl border border-line bg-card">
                 @if ($bill->isImage())
@@ -228,5 +229,6 @@ new #[Title('Rachunek')] class extends Component {
             </div>
             <flux:link :href="route('bills.file', $bill)" target="_blank" class="mt-2 inline-block text-sm">{{ __('Otwórz fakturę w nowej karcie') }}</flux:link>
         </div>
+        @endif
     </div>
 </div>

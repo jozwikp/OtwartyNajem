@@ -188,9 +188,12 @@ new #[Title('Rachunki')] class extends Component {
 @endphp
 
 <div class="mx-auto w-full max-w-5xl" @if ($this->pending->isNotEmpty()) wire:poll.3s @endif>
-    <div class="mb-8">
-        <flux:heading size="xl" level="1">{{ __('Rachunki') }}</flux:heading>
-        <flux:text class="mt-1 text-base">{{ __('Wgraj faktury za media – sami odczytamy kwoty, daty i dopasujemy je do mieszkań. Ty tylko zatwierdzasz.') }}</flux:text>
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <flux:heading size="xl" level="1">{{ __('Rachunki') }}</flux:heading>
+            <flux:text class="mt-1 text-base">{{ __('Wgraj faktury za media – sami odczytamy kwoty, daty i dopasujemy je do mieszkań. Ty tylko zatwierdzasz.') }}</flux:text>
+        </div>
+        <flux:button icon="pencil-square" :href="route('bills.create')" wire:navigate>{{ __('Dodaj rachunek ręcznie') }}</flux:button>
     </div>
 
     {{-- Upload --}}

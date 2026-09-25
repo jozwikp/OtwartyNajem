@@ -17,8 +17,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::livewire('wplaty', 'pages::payments.index')->name('payments.index');
     Route::livewire('rachunki', 'pages::bills.index')->name('bills.index');
+    Route::livewire('rachunki/dodaj', 'pages::bills.create')->name('bills.create');
     Route::livewire('rachunki/{bill}', 'pages::bills.edit')->middleware('can:update,bill')->name('bills.edit');
     Route::get('rachunki/{bill}/plik', function (Bill $bill) {
+        abort_unless($bill->hasFile(), 404);
+
         return response(EncryptedFiles::get($bill->file_path), 200, [
             'Content-Type' => $bill->file_mime ?? 'application/octet-stream',
             'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_INLINE, $bill->file_name, Str::ascii($bill->file_name)),
