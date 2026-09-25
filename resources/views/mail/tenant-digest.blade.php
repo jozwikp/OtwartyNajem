@@ -4,15 +4,15 @@
     $next = $statement->nextDueCharge();
 @endphp
 <x-mail::message>
-# Dzień dobry{{ $greetingNames ? ', '.$greetingNames : '' }}!
+# {{ $greetingNames ? __('Dzień dobry, :name!', ['name' => $greetingNames]) : __('Dzień dobry!') }}
 
-Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
+{{ __('Poniżej zmiany w opłatach za mieszkanie') }} **{{ $lease->apartment->label }}**.
 
 @if ($digest->newCharges->isNotEmpty())
-## Nowe opłaty
+## {{ __('Nowe opłaty') }}
 
 <x-mail::table>
-| Za co | Kwota | Termin |
+| {{ __('Za co') }} | {{ __('Kwota') }} | {{ __('Termin') }} |
 |:--|--:|--:|
 @foreach ($digest->newCharges as $charge)
 | {{ $charge->displayDescription() }} | {{ $digest->money($charge->amount) }} | {{ $charge->due_on?->format('d.m.Y') ?? '—' }} |
@@ -21,10 +21,10 @@ Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
 @endif
 
 @if ($digest->changedCharges->isNotEmpty())
-## Zmienione kwoty
+## {{ __('Zmienione kwoty') }}
 
 <x-mail::table>
-| Za co | Było | Jest |
+| {{ __('Za co') }} | {{ __('Było') }} | {{ __('Jest') }} |
 |:--|--:|--:|
 @foreach ($digest->changedCharges as $charge)
 | {{ $charge->displayDescription() }} | {{ $digest->money($charge->notified_amount) }} | **{{ $digest->money($charge->amount) }}** |
@@ -33,7 +33,7 @@ Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
 @endif
 
 @if ($digest->payments->isNotEmpty())
-## Otrzymane wpłaty – dziękujemy!
+## {{ __('Otrzymane wpłaty – dziękujemy!') }}
 
 @foreach ($digest->payments as $payment)
 - {{ $payment->booked_on->format('d.m.Y') }}: {{ $digest->money($payment->amount) }}
@@ -42,34 +42,34 @@ Poniżej zmiany w opłatach za mieszkanie **{{ $lease->apartment->label }}**.
 
 <x-mail::panel>
 @if ($balance > 0)
-**Łącznie do zapłaty: {{ $digest->money($balance) }}**
+**{{ __('Łącznie do zapłaty: :amount', ['amount' => $digest->money($balance)]) }}**
 @if ($overdue > 0)
 
-w tym po terminie: {{ $digest->money($overdue) }}
+{{ __('w tym po terminie: :amount', ['amount' => $digest->money($overdue)]) }}
 @endif
 @if ($next && $next->due_on)
 
-Najbliższy termin: {{ $next->due_on->format('d.m.Y') }}
+{{ __('Najbliższy termin: :date', ['date' => $next->due_on->format('d.m.Y')]) }}
 @endif
 @elseif ($balance < 0)
-**Masz nadpłatę: {{ $digest->money(-$balance) }}** – zaliczymy ją na kolejne opłaty.
+**{{ __('Masz nadpłatę: :amount', ['amount' => $digest->money(-$balance)]) }}** – {{ __('zaliczymy ją na kolejne opłaty.') }}
 @else
-**Wszystko opłacone – dziękujemy!**
+**{{ __('Wszystko opłacone – dziękujemy!') }}**
 @endif
 </x-mail::panel>
 
 @if ($balance > 0 && $lease->bank_account)
-**Dane do przelewu**<br>
-Numer konta: {{ \App\Support\BankAccount::format($lease->bank_account) }}<br>
-Tytuł: {{ $digest->transferTitle() }}
+**{{ __('Dane do przelewu') }}**<br>
+{{ __('Numer konta') }}: {{ \App\Support\BankAccount::format($lease->bank_account) }}<br>
+{{ __('Tytuł') }}: {{ $digest->transferTitle() }}
 @endif
 
-W razie pytań po prostu odpowiedz na tę wiadomość{{ $ownerNames ? ' – trafi do: '.$ownerNames : '' }}.
+{{ $ownerNames ? __('W razie pytań po prostu odpowiedz na tę wiadomość – trafi do: :names.', ['names' => $ownerNames]) : __('W razie pytań po prostu odpowiedz na tę wiadomość.') }}
 
-Pozdrawiamy,<br>
+{{ __('Pozdrawiamy') }},<br>
 {{ $ownerNames ?: config('app.name') }}
 
 <x-mail::subcopy>
-Wiadomość wysłana automatycznie z serwisu {{ config('app.name') }} w imieniu właściciela mieszkania. Podsumowanie wysyłamy najwyżej raz dziennie, gdy pojawią się nowe opłaty.
+{{ __('Wiadomość wysłana automatycznie z serwisu :app w imieniu właściciela mieszkania. Podsumowanie wysyłamy najwyżej raz dziennie, gdy pojawią się nowe opłaty.', ['app' => config('app.name')]) }}
 </x-mail::subcopy>
 </x-mail::message>

@@ -5,6 +5,7 @@ use App\Models\Apartment;
 use App\Models\Bill;
 use App\Models\Lease;
 use App\Support\EncryptedFiles;
+use App\Support\Locales;
 use App\Support\TenantDigest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -46,7 +47,11 @@ Route::middleware(['auth'])->group(function () {
             Route::livewire('najmy/{lease}', 'pages::leases.show')->name('leases.show');
             Route::livewire('najmy/{lease}/edytuj', 'pages::leases.edit')->name('leases.edit');
             Route::livewire('najmy/{lease}/rozliczenia', 'pages::leases.ledger')->name('leases.ledger');
-            Route::get('najmy/{lease}/powiadomienie', fn (Apartment $apartment, Lease $lease) => (new TenantDigestMail(new TenantDigest($lease)))->locale('pl'))
+            Route::get('najmy/{lease}/powiadomienie', function (Apartment $apartment, Lease $lease) {
+                $locale = in_array(request('lang'), Locales::codes(), true) ? request('lang') : ($lease->primaryTenant->locale ?? 'pl');
+
+                return (new TenantDigestMail(new TenantDigest($lease), $lease->tenants->where('locale', $locale)->values()))->locale($locale);
+            })
                 ->name('leases.notification-preview');
         });
     });

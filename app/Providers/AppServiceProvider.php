@@ -9,6 +9,7 @@ use App\Support\Audit;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -33,6 +34,15 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureAuditLog();
+
+        // Our texts have Polish keys and the framework's English ones: never fall back to the other language.
+        // Dates (month names) follow too – also when an e-mail is rendered in the tenant's language.
+        Event::listen(LocaleUpdated::class, function (LocaleUpdated $event) {
+            app('translator')->setFallback($event->locale);
+            CarbonImmutable::setLocale($event->locale);
+            // e.g. Polish has a standalone month form English lacks – don't borrow it from Polish.
+            CarbonImmutable::setFallbackLocale($event->locale);
+        });
     }
 
     /**

@@ -38,7 +38,7 @@ new #[Title('Ustawienia wyglądu')] class extends Component {
 
         <div class="mt-10">
             <flux:heading>Język / Language</flux:heading>
-            <flux:subheading class="mb-4">{{ __('Język interfejsu, który widzisz. E-maile do najemców zostają po polsku.') }}</flux:subheading>
+            <flux:subheading class="mb-4">{{ __('Język interfejsu, który widzisz. Język e-maili do najemcy wybierasz przy każdym najemcy.') }}</flux:subheading>
 
             <flux:radio.group wire:model.live="locale" variant="segmented">
                 @foreach (\App\Support\Locales::SUPPORTED as $code => $name)

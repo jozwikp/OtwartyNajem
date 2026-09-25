@@ -18,7 +18,7 @@ new #[Title('Nowy najem')] class extends Component {
 
     public int $step = 1;
 
-    /** @var list<array{first_name: string, last_name: string, email: string, phone: string}> */
+    /** @var list<array{first_name: string, last_name: string, email: string, phone: string, locale: string}> */
     public array $tenants = [];
 
     public string $rent = '';
@@ -44,11 +44,11 @@ new #[Title('Nowy najem')] class extends Component {
     }
 
     /**
-     * @return array{first_name: string, last_name: string, email: string, phone: string}
+     * @return array{first_name: string, last_name: string, email: string, phone: string, locale: string}
      */
     protected function emptyTenant(): array
     {
-        return ['first_name' => '', 'last_name' => '', 'email' => '', 'phone' => ''];
+        return ['first_name' => '', 'last_name' => '', 'email' => '', 'phone' => '', 'locale' => app()->getLocale()];
     }
 
     public function addTenant(): void
@@ -81,6 +81,7 @@ new #[Title('Nowy najem')] class extends Component {
                 'tenants.*.last_name' => ['required', 'string', 'max:100'],
                 'tenants.*.email' => ['nullable', 'email', 'max:255'],
                 'tenants.*.phone' => ['nullable', 'string', 'max:40'],
+                'tenants.*.locale' => ['required', \Illuminate\Validation\Rule::in(\App\Support\Locales::codes())],
             ], attributes: [
                 'tenants.*.first_name' => __('imię'),
                 'tenants.*.last_name' => __('nazwisko'),
@@ -167,6 +168,7 @@ new #[Title('Nowy najem')] class extends Component {
             'last_name' => $t['last_name'],
             'email' => $t['email'] !== '' ? mb_strtolower($t['email']) : null,
             'phone' => $t['phone'] !== '' ? $t['phone'] : null,
+            'locale' => $t['locale'],
         ], $this->tenants);
 
         try {
@@ -217,6 +219,11 @@ new #[Title('Nowy najem')] class extends Component {
                                     <flux:input wire:model="tenants.{{ $index }}.last_name" :label="__('Nazwisko')" autocomplete="off" />
                                     <flux:input wire:model="tenants.{{ $index }}.email" type="email" :label="__('E-mail')" :badge="__('Opcjonalnie')" autocomplete="off" />
                                     <flux:input wire:model="tenants.{{ $index }}.phone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" :description="__('Nie jest potrzebny do działania aplikacji.')" autocomplete="off" />
+                                    <flux:select wire:model="tenants.{{ $index }}.locale" :label="__('Język wiadomości')" :description="__('W tym języku najemca dostanie e-maile.')">
+                                        @foreach (\App\Support\Locales::SUPPORTED as $code => $name)
+                                            <flux:select.option :value="$code">{{ $name }}</flux:select.option>
+                                        @endforeach
+                                    </flux:select>
                                 </div>
                             </div>
                         @endforeach

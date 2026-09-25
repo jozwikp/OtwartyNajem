@@ -18,11 +18,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $last_name
  * @property string|null $email
  * @property string|null $phone
+ * @property string $locale
  * @property bool $is_primary
  * @property-read string $full_name
  * @property-read Lease $lease
  */
-#[Fillable(['first_name', 'last_name', 'email', 'phone', 'is_primary'])]
+#[Fillable(['first_name', 'last_name', 'email', 'phone', 'locale', 'is_primary'])]
 class LeaseTenant extends Model implements BelongsToApartment
 {
     /** @use HasFactory<LeaseTenantFactory> */
@@ -46,7 +47,7 @@ class LeaseTenant extends Model implements BelongsToApartment
 
     protected function auditedAttributes(): array
     {
-        return ['first_name', 'last_name', 'email', 'phone', 'is_primary'];
+        return ['first_name', 'last_name', 'email', 'phone', 'locale', 'is_primary'];
     }
 
     /**

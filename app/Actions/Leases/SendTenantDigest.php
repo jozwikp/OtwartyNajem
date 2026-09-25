@@ -4,6 +4,8 @@ namespace App\Actions\Leases;
 
 use App\Mail\TenantDigestMail;
 use App\Models\Lease;
+use App\Models\LeaseTenant;
+use App\Support\Locales;
 use App\Support\TenantDigest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -29,10 +31,19 @@ class SendTenantDigest
 
         $ownerEmails = $lease->apartment->owners->pluck('email')->filter()->unique()->values()->all();
 
-        // Owners always get a copy of what their tenant was told.
-        Mail::to($lease->tenantEmails())->cc($ownerEmails)->locale('pl')->send(new TenantDigestMail($digest));
+        // Each tenant reads it in their own language; owners always get a copy of what was sent.
+        $byLanguage = $lease->tenants
+            ->filter(fn (LeaseTenant $tenant) => filled($tenant->email))
+            ->groupBy(fn (LeaseTenant $tenant) => in_array($tenant->locale, Locales::codes(), true) ? $tenant->locale : 'pl');
 
-        DB::transaction(function () use ($lease, $digest, $ownerEmails) {
+        foreach ($byLanguage as $locale => $tenants) {
+            Mail::to($tenants->pluck('email')->unique()->values()->all())
+                ->cc($ownerEmails)
+                ->locale((string) $locale)
+                ->send(new TenantDigestMail($digest, $tenants->values()));
+        }
+
+        DB::transaction(function () use ($lease, $digest, $ownerEmails, $byLanguage) {
             $digest->markAsSent();
 
             activity('leases')
@@ -40,6 +51,7 @@ class SendTenantDigest
                 ->event('tenant_notified')
                 ->withProperties([
                     'recipients' => $lease->tenantEmails(),
+                    'languages' => $byLanguage->keys()->all(),
                     'cc' => $ownerEmails,
                     'new_charges' => $digest->newCharges->map(fn ($e) => ['description' => $e->description, 'amount' => $e->amount])->all(),
                     'changed_charges' => $digest->changedCharges->map(fn ($e) => ['description' => $e->description, 'from' => $e->notified_amount, 'to' => $e->amount])->all(),

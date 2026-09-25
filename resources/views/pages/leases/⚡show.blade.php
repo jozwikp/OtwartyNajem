@@ -34,6 +34,7 @@ new #[Title('Najem')] class extends Component {
     public string $tenantLastName = '';
     public string $tenantEmail = '';
     public string $tenantPhone = '';
+    public string $tenantLocale = 'pl';
 
     // Charge modals
     public ?int $chargeId = null;
@@ -127,6 +128,7 @@ new #[Title('Najem')] class extends Component {
         $this->tenantLastName = $tenant->last_name ?? '';
         $this->tenantEmail = $tenant->email ?? '';
         $this->tenantPhone = $tenant->phone ?? '';
+        $this->tenantLocale = $tenant->locale ?? app()->getLocale();
 
         Flux::modal('tenant')->show();
     }
@@ -140,6 +142,7 @@ new #[Title('Najem')] class extends Component {
             'tenantLastName' => ['required', 'string', 'max:100'],
             'tenantEmail' => ['nullable', 'email', 'max:255'],
             'tenantPhone' => ['nullable', 'string', 'max:40'],
+            'tenantLocale' => ['required', Rule::in(\App\Support\Locales::codes())],
         ], attributes: [
             'tenantFirstName' => __('imię'), 'tenantLastName' => __('nazwisko'),
             'tenantEmail' => __('e-mail'), 'tenantPhone' => __('telefon'),
@@ -150,6 +153,7 @@ new #[Title('Najem')] class extends Component {
             'last_name' => trim($data['tenantLastName']),
             'email' => filled($data['tenantEmail']) ? mb_strtolower(trim($data['tenantEmail'])) : null,
             'phone' => filled($data['tenantPhone']) ? trim($data['tenantPhone']) : null,
+            'locale' => $data['tenantLocale'],
         ];
 
         if ($this->editingTenantId) {
@@ -407,6 +411,7 @@ new #[Title('Najem')] class extends Component {
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2 font-medium">
                                         {{ $tenant->full_name }}
+                                        <flux:badge size="sm" :title="__('Język wiadomości')">{{ strtoupper($tenant->locale) }}</flux:badge>
                                         @if ($tenant->is_primary && $lease->tenants->count() > 1)
                                             <flux:badge size="sm" color="green">{{ __('Główny kontakt') }}</flux:badge>
                                         @endif
@@ -522,7 +527,7 @@ new #[Title('Najem')] class extends Component {
                                 <flux:heading size="lg">{{ __('Powiadomienia e-mail dla najemcy') }}</flux:heading>
                                 <flux:badge size="sm" :color="$lease->notify_tenants ? 'green' : 'zinc'">{{ $lease->notify_tenants ? __('włączone') : __('wyłączone') }}</flux:badge>
                             </div>
-                            <flux:text class="mt-1 text-sm">{{ __('Jedna wiadomość dziennie po 16:00, tylko gdy są nowe opłaty, rachunki lub zmiany kwot. Bez załączników. Właściciele dostają kopię.') }}</flux:text>
+                            <flux:text class="mt-1 text-sm">{{ __('Jedna wiadomość dziennie po 16:00, tylko gdy są nowe opłaty, rachunki lub zmiany kwot – w języku wybranym przy każdym najemcy. Bez załączników. Właściciele dostają kopię.') }}</flux:text>
 
                             @if ($lease->notify_tenants)
                                 @if ($emails === [])
@@ -548,7 +553,11 @@ new #[Title('Najem')] class extends Component {
 
                         <div class="flex flex-wrap gap-2">
                             @if ($lease->notify_tenants && $emails !== [])
-                                <flux:button size="sm" icon="eye" :href="route('leases.notification-preview', [$apartment, $lease])" target="_blank">{{ __('Podgląd wiadomości') }}</flux:button>
+                                @foreach ($lease->tenants->pluck('locale')->unique() as $previewLocale)
+                                    <flux:button size="sm" icon="eye" :href="route('leases.notification-preview', [$apartment, $lease, 'lang' => $previewLocale])" target="_blank">
+                                        {{ __('Podgląd wiadomości') }}@if ($lease->tenants->pluck('locale')->unique()->count() > 1) ({{ strtoupper($previewLocale) }})@endif
+                                    </flux:button>
+                                @endforeach
                             @endif
                             <flux:button size="sm" wire:click="toggleNotifications">{{ $lease->notify_tenants ? __('Wyłącz') : __('Włącz') }}</flux:button>
                         </div>
@@ -628,6 +637,11 @@ new #[Title('Najem')] class extends Component {
                         <flux:input wire:model="tenantLastName" :label="__('Nazwisko')" />
                         <flux:input wire:model="tenantEmail" type="email" :label="__('E-mail')" :badge="__('Opcjonalnie')" />
                         <flux:input wire:model="tenantPhone" type="tel" :label="__('Telefon')" :badge="__('Opcjonalnie')" :description="__('Nie jest potrzebny do działania aplikacji.')" />
+                        <flux:select wire:model="tenantLocale" :label="__('Język wiadomości')" :description="__('W tym języku najemca dostanie e-maile.')">
+                            @foreach (\App\Support\Locales::SUPPORTED as $code => $name)
+                                <flux:select.option :value="$code">{{ $name }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
                     </div>
                     <div class="flex justify-end gap-2">
                         <flux:modal.close><flux:button variant="ghost">{{ __('Anuluj') }}</flux:button></flux:modal.close>

@@ -206,7 +206,7 @@ new #[Title('Rozliczenia')] class extends Component {
                         <details class="group overflow-hidden rounded-2xl border border-line bg-card" @if ($loop->index < 3 || $month['open'] > 0) open @endif wire:key="month-{{ $key }}">
                             <summary class="flex cursor-pointer list-none flex-wrap items-center gap-x-4 gap-y-1 p-4 hover:bg-tray">
                                 <flux:icon.chevron-right variant="mini" class="text-stone-400 transition group-open:rotate-90" />
-                                <span class="min-w-40 flex-1 font-semibold first-letter:uppercase">{{ $month['month']->locale('pl')->isoFormat('MMMM YYYY') }}</span>
+                                <span class="min-w-40 flex-1 font-semibold first-letter:uppercase">{{ \Illuminate\Support\Str::ucfirst($month['month']->isoFormat('MMMM YYYY')) }}</span>
                                 <span class="text-sm text-stone-500">{{ __('naliczono :amount', ['amount' => $fmt($month['charged'])]) }}</span>
                                 @if ($month['paid'] > 0)
                                     <span class="text-sm text-stone-500">· {{ __('wpłacono :amount', ['amount' => $fmt($month['paid'])]) }}</span>

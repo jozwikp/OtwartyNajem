@@ -19,7 +19,7 @@ OtwartyNajem pilnuje za Ciebie czynszu, rachunków i wpłat najemców. Wgrywasz 
 - **Powiadomienia dla najemców** – jeden e-mail dziennie po 16:00 (tylko gdy coś doszło): nowe opłaty, zmienione kwoty, otrzymane wpłaty, saldo i dane do przelewu. Właściciele dostają kopię.
 - **Historia zmian** – każda operacja jest zapisana: kto, kiedy, co zmienił (z wartościami przed i po), z jakiego IP. Także automatyczne naliczenia i wysłane e-maile.
 
-Interfejs jest **po polsku i po angielsku** – każdy użytkownik wybiera język w *Ustawienia → Wygląd i język* (goście dostają język przeglądarki). Trudniejsze operacje są podzielone na krótkie kroki. E-maile do najemców są wysyłane po polsku.
+Interfejs jest **po polsku i po angielsku** – każdy użytkownik wybiera język w *Ustawienia → Wygląd i język* (goście dostają język przeglądarki). Trudniejsze operacje są podzielone na krótkie kroki. Każdy najemca dostaje e-maile w swoim języku (polski lub angielski), niezależnie od języka właściciela.
 
 ## Technologia
 
