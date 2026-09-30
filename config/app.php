@@ -68,6 +68,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Behind a proxy or CDN, the visitor's real IP address (used for sign-in
+    | limits and the change history) arrives in a header the proxy adds.
+    | "cloudflare" trusts Cloudflare's addresses, "*" whatever connects
+    | directly, or list addresses separated by commas. Empty = no proxy.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

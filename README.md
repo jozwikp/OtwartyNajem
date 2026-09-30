@@ -191,6 +191,7 @@ Przy każdym `git push` GitHub Actions uruchamia formatowanie (Pint), analizę s
 
 - [ ] `APP_ENV=production`, `APP_DEBUG=false` (inaczej błędy pokazują szczegóły serwera).
 - [ ] HTTPS oraz `SESSION_SECURE_COOKIE=true`.
+- [ ] Za Cloudflare lub innym proxy: `TRUSTED_PROXIES=cloudflare` (albo adresy proxy) – inaczej limity logowań i historia zmian widzą adres proxy zamiast adresu użytkownika.
 - [ ] Silny, unikalny `APP_KEY` przechowywany osobno od kopii zapasowych.
 - [ ] Szyfrowane i regularnie testowane kopie zapasowe (baza **i** `storage/app/private`).
 - [ ] Rozważ PostgreSQL/MySQL zamiast pliku SQLite przy większej liczbie użytkowników.
@@ -201,7 +202,6 @@ Przy każdym `git push` GitHub Actions uruchamia formatowanie (Pint), analizę s
 
 Przed udostępnieniem aplikacji obcym osobom warto to uzupełnić:
 
-- **Weryfikacja adresu e-mail jest wyłączona** – można założyć konto na cudzy adres. Włącz `Features::emailVerification()` w `config/fortify.php` i interfejs `MustVerifyEmail` w modelu `User`.
 - **Brak akceptacji regulaminu i polityki prywatności** przy rejestracji.
 - **Usuwanie jest „miękkie”** – usunięte mieszkania, najmy i rachunki zostają w bazie (`deleted_at`). Brak trwałego usuwania na żądanie.
 - **Brak automatycznego czyszczenia** starych danych: historia zmian (`clean_after_days` jest ustawione, ale polecenie `activitylog:clean` nie jest zaplanowane), pominięte wpływy z wyciągów, dane najemców po zakończeniu najmu.
