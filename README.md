@@ -60,6 +60,8 @@ OPENROUTER_MODEL=openai/gpt-5-nano  # model obsługujący PDF i obrazy
 
 MAIL_MAILER=smtp                    # lokalnie może zostać "log" – maile trafią do storage/logs/laravel.log
 MAIL_FROM_ADDRESS="powiadomienia@twoja-domena.pl"
+
+ADMIN_EMAIL=admin@twoja-domena.pl   # powiadomienie o każdym nowym koncie (puste = wyłączone)
 ```
 
 Uruchom wszystko jednym poleceniem (serwer, kolejka, logi, Vite):
@@ -101,6 +103,7 @@ Warto wiedzieć:
 ### Konta i logowanie
 
 - Hasła przechowywane wyłącznie jako skrót (bcrypt). W środowisku produkcyjnym wymagane: min. 12 znaków, małe i wielkie litery, cyfry, symbole oraz sprawdzenie w bazie wycieków (Have I Been Pwned).
+- Nowe konto trzeba potwierdzić linkiem wysłanym e-mailem – do tego czasu aplikacja jest niedostępna. To samo po zmianie adresu e-mail w profilu.
 - Weryfikacja dwuetapowa (TOTP, kody zapasowe) i logowanie kluczami dostępu (passkeys) – w *Ustawienia → Bezpieczeństwo*.
 - Limit prób: 5 logowań na minutę na e-mail i adres IP, 5 prób kodu 2FA na minutę.
 - Ochrona CSRF, ciasteczka sesji `HttpOnly` i `SameSite=Lax`, sesje w bazie danych.

@@ -26,6 +26,12 @@ new #[Layout('layouts::auth')] #[Title('Zaproszenie')] class extends Component {
             session()->put('url.intended', route('invitations.show', $token));
             session()->put('invitation_email', $this->invitation->email);
         }
+
+        // Only a confirmed account can join – come back here once the address is confirmed.
+        if (Auth::user()?->hasVerifiedEmail() === false) {
+            session()->put('url.intended', route('invitations.show', $token));
+            $this->redirectRoute('verification.notice');
+        }
     }
 
     public function accept(AcceptInvitation $acceptInvitation): void
@@ -50,7 +56,7 @@ new #[Layout('layouts::auth')] #[Title('Zaproszenie')] class extends Component {
 
     protected function pendingInvitation(): ApartmentInvitation
     {
-        abort_unless(Auth::check(), 403);
+        abort_unless(Auth::user()?->hasVerifiedEmail(), 403);
 
         $invitation = ApartmentInvitation::findByPlainToken($this->token);
         abort_unless($invitation?->isPending() && $invitation->apartment, 404);

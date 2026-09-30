@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
 
     Route::livewire('wplaty', 'pages::payments.index')->name('payments.index');

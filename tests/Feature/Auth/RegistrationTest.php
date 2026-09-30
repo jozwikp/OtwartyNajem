@@ -37,5 +37,7 @@ class RegistrationTest extends TestCase
             ->assertRedirect(route('dashboard', absolute: false));
 
         $this->assertAuthenticated();
+
+        $this->get(route('dashboard'))->assertRedirect(route('verification.notice'));
     }
 }

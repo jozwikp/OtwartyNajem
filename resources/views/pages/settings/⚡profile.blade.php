@@ -41,6 +41,11 @@ new #[Title('Ustawienia profilu')] class extends Component {
 
         $user->save();
 
+        // A new address has to be confirmed before the app can be used again – send the link right away.
+        if ($user->wasChanged('email')) {
+            $user->sendEmailVerificationNotification();
+        }
+
         Flux::toast(variant: 'success', text: __('Profile updated.'));
     }
 
