@@ -38,6 +38,11 @@ return new class extends Migration
 
     public function up(): void
     {
+        // MySQL backs the lease_id foreign key with the unique index – give it its own first.
+        Schema::table('lease_payers', function (Blueprint $table) {
+            $table->index('lease_id');
+        });
+
         Schema::table('lease_payers', function (Blueprint $table) {
             $table->dropUnique(['lease_id', 'account']);
             $table->dropIndex(['account']);
