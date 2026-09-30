@@ -78,7 +78,7 @@ Dwie rzeczy dzieją się automatycznie i wymagają działających procesów:
 
 | Co | Po co | Lokalnie | Na serwerze |
 |---|---|---|---|
-| Kolejka | odczyt faktur przez AI | zawiera się w `composer run dev` (albo `php artisan queue:work`) | `php artisan queue:work` pod nadzorem (np. Supervisor) |
+| Kolejka | odczyt faktur przez AI | zawiera się w `composer run dev` (albo `php artisan queue:work`) | uruchamiana przez harmonogram (co minutę, zawsze jeden proces) – nic nie trzeba dodawać |
 | Harmonogram | naliczanie opłat (00:15), e-maile do najemców (16:00) | `php artisan schedule:work` | cron: `* * * * * php artisan schedule:run` |
 
 Opłaty stałe dopisują się też same przy wejściu w zakładkę **Rozliczenia**, więc nic nie zginie, nawet gdy harmonogram chwilowo nie działa.
