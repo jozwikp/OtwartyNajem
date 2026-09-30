@@ -107,6 +107,7 @@ Warto wiedzieć:
 - Weryfikacja dwuetapowa (TOTP, kody zapasowe) i logowanie kluczami dostępu (passkeys) – w *Ustawienia → Bezpieczeństwo*.
 - Limit prób: 5 logowań na minutę na e-mail i adres IP, 5 prób kodu 2FA na minutę.
 - Ochrona CSRF, ciasteczka sesji `HttpOnly` i `SameSite=Lax`, sesje w bazie danych.
+- Nagłówki bezpieczeństwa: aplikacji nie da się osadzić na cudzej stronie (`X-Frame-Options`, `frame-ancestors`), a `Content-Security-Policy` pozwala uruchamiać tylko skrypty z serwera aplikacji lub z jednorazowym kodem (nonce) danej odpowiedzi – wstrzyknięty `<script>` się nie wykona.
 - Logowania, wylogowania i zmiany hasła trafiają do historii.
 
 ### Dostęp do danych
@@ -195,7 +196,7 @@ Przy każdym `git push` GitHub Actions uruchamia formatowanie (Pint), analizę s
 - [ ] Silny, unikalny `APP_KEY` przechowywany osobno od kopii zapasowych.
 - [ ] Szyfrowane i regularnie testowane kopie zapasowe (baza **i** `storage/app/private`).
 - [ ] Rozważ PostgreSQL/MySQL zamiast pliku SQLite przy większej liczbie użytkowników.
-- [ ] Nagłówki bezpieczeństwa na serwerze WWW (HSTS, `X-Frame-Options`, `Content-Security-Policy`).
+- [ ] HSTS na serwerze WWW lub w Cloudflare (`X-Frame-Options`, `Content-Security-Policy` i pozostałe nagłówki wysyła sama aplikacja).
 - [ ] Regularne aktualizacje zależności (`composer update`, `npm update`).
 
 ### Czego aplikacja jeszcze nie robi (znane braki)
