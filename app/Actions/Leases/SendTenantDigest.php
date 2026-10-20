@@ -55,8 +55,6 @@ class SendTenantDigest
                     'cc' => $ownerEmails,
                     'new_charges' => $digest->newCharges->map(fn ($e) => ['description' => $e->description, 'amount' => $e->amount])->all(),
                     'changed_charges' => $digest->changedCharges->map(fn ($e) => ['description' => $e->description, 'from' => $e->notified_amount, 'to' => $e->amount])->all(),
-                    'payments' => $digest->payments->sum('amount'),
-                    'balance' => $digest->statement->balance(),
                     'subject' => $digest->subject(),
                 ])
                 ->log('tenant_notified');

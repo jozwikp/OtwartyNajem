@@ -55,7 +55,7 @@ function approvedBill(Lease $lease, int $amount = 31240): Bill
     return $bill->fresh();
 }
 
-test('one daily summary goes out with new charges, balance and bank details', function () {
+test('one daily summary goes out with new charges, their total and bank details', function () {
     $this->apartment->owners()->attach(User::factory()->create(['email' => 'piotr@example.com']));
     $lease = leaseStarting('2026-09-01');
     approvedBill($lease);
@@ -71,9 +71,10 @@ test('one daily summary goes out with new charges, balance and bank details', fu
             && $mail->hasCc('piotr@example.com')
             && ! $mail->hasTo('anna@example.com')
             && $mail->hasReplyTo('anna@example.com')
-            && $mail->hasSubject('Kawalerka Mokotów – do zapłaty '.Money::format(281240, 'PLN'))
+            && $mail->hasSubject('Kawalerka Mokotów – nowe opłaty')
             && str_contains($html, 'Opłata za mieszkanie – wrzesień 2026')
             && str_contains($html, 'Rachunek: Prąd (Tauron)')
+            && str_contains($html, 'Razem nowe opłaty: '.Money::format(281240, 'PLN'))
             && str_contains($html, '61 1090 1014 0000 0712 1981 2874')
             && $mail->attachments === [];
     });
@@ -85,7 +86,6 @@ test('one daily summary goes out with new charges, balance and bank details', fu
     $activity = Activity::where('event', 'tenant_notified')->sole();
     expect($activity->getProperty('recipients'))->toBe(['jan@example.com'])
         ->and($activity->getProperty('cc'))->toEqualCanonicalizing(['anna@example.com', 'piotr@example.com'])
-        ->and($activity->getProperty('balance'))->toBe(281240)
         ->and($lease->fresh()->last_notified_at)->not->toBeNull();
 
     $this->get(route('apartments.history', $this->apartment))->assertSee('Wysłano podsumowanie do najemcy (jan@example.com, kopia do właścicieli)');
@@ -116,8 +116,9 @@ test('changed amounts are reported as corrections', function () {
         && str_contains($mail->render(), 'Zmienione kwoty'));
 });
 
-test('payments alone do not trigger a mail but show up in the next one', function () {
-    $lease = leaseStarting('2026-09-01');
+test('the summary never shows the balance, payments or overdue amounts', function () {
+    // August is overdue in the app, but its payment may simply not be imported yet.
+    $lease = leaseStarting('2026-08-01');
     $this->artisan('tenants:notify');
 
     app(RecordPayment::class)->handle($lease, $this->owner, 250000, CarbonImmutable::parse('2026-09-24'), PaymentMethod::Transfer);
@@ -127,8 +128,16 @@ test('payments alone do not trigger a mail but show up in the next one', functio
     approvedBill($lease, 10000);
     $this->artisan('tenants:notify');
 
-    Mail::assertSent(TenantDigestMail::class, fn (TenantDigestMail $mail) => $mail->digest->payments->sum('amount') === 250000
-        && str_contains($mail->render(), 'Otrzymane wpłaty'));
+    Mail::assertSent(TenantDigestMail::class, 2);
+    Mail::assertSent(TenantDigestMail::class, function (TenantDigestMail $mail) {
+        $html = $mail->render();
+
+        return ! str_contains($html, 'po terminie')
+            && ! str_contains($html, 'Łącznie do zapłaty')
+            && ! str_contains($html, 'Otrzymane wpłaty')
+            && ! str_contains($html, 'nadpłat')
+            && ! str_contains($html, 'Razem nowe opłaty'); // a single charge needs no total
+    });
 });
 
 test('nothing is sent when notifications are off or the tenant has no e-mail', function () {
@@ -166,7 +175,8 @@ test('the lease page shows what goes out today and a preview', function () {
     $this->get(route('leases.notification-preview', [$this->apartment, $lease]))
         ->assertOk()
         ->assertSee('Nowe opłaty')
-        ->assertSee('Łącznie do zapłaty');
+        ->assertSee('Dane do przelewu')
+        ->assertDontSee('Łącznie do zapłaty');
 });
 
 test('the summary is scheduled once a day at 16:00 Warsaw time', function () {

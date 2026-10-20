@@ -13,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
 /**
- * The daily summary for tenants: new charges, changed amounts, payments received and the balance.
+ * The daily summary for tenants: new charges and changed amounts.
  */
 class TenantDigestMail extends Mailable
 {
@@ -43,7 +43,6 @@ class TenantDigestMail extends Mailable
             with: [
                 'digest' => $this->digest,
                 'lease' => $lease,
-                'statement' => $this->digest->statement,
                 'greetingNames' => ($this->recipients ?? $lease->tenants)->pluck('first_name')->join(', ', ' '.__('i').' '),
                 'ownerNames' => $lease->apartment->owners->pluck('name')->join(', ', ' '.__('i').' '),
             ],

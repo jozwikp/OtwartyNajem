@@ -120,14 +120,14 @@ test('each tenant gets e-mails in their own language, whatever the owner uses', 
         return $mail->locale === 'en'
             && $mail->hasTo('jan@example.com') && ! $mail->hasTo('ewa@example.com')
             && str_contains($html, 'Hello, Jan!')
-            && str_contains($html, 'Total to pay: PLN')
+            && str_contains($html, 'New charges')
             && str_contains($html, 'Rent – September 2026')
             && ! str_contains($html, 'Łącznie');
     });
 
     Mail::assertSent(TenantDigestMail::class, fn (TenantDigestMail $mail) => $mail->locale === 'pl'
         && $mail->hasTo('ewa@example.com')
-        && str_contains($mail->render(), 'Łącznie do zapłaty')
+        && str_contains($mail->render(), 'Nowe opłaty')
         && str_contains($mail->render(), 'Opłata za mieszkanie – wrzesień 2026'));
 
     // Owners get a copy of both.
@@ -154,7 +154,7 @@ test('the English e-mail subject and preview are in English', function () {
 
     $sent = app('mailer')->getSymfonyTransport()->messages();
     expect($sent)->toHaveCount(1)
-        ->and($sent->first()->getOriginalMessage()->getSubject())->toBe('Kawalerka Mokotów – PLN'."\u{00A0}".'2,500 to pay');
+        ->and($sent->first()->getOriginalMessage()->getSubject())->toBe('Kawalerka Mokotów – new charges');
 });
 
 test('the tenant language is chosen in the lease wizard and tenant form', function () {

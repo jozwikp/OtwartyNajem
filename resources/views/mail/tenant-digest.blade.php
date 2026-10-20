@@ -1,8 +1,3 @@
-@php
-    $balance = $statement->balance();
-    $overdue = $statement->overdueAmount();
-    $next = $statement->nextDueCharge();
-@endphp
 <x-mail::message>
 # {{ $greetingNames ? __('Dzień dobry, :name!', ['name' => $greetingNames]) : __('Dzień dobry!') }}
 
@@ -32,33 +27,13 @@
 </x-mail::table>
 @endif
 
-@if ($digest->payments->isNotEmpty())
-## {{ __('Otrzymane wpłaty – dziękujemy!') }}
-
-@foreach ($digest->payments as $payment)
-- {{ $payment->booked_on->format('d.m.Y') }}: {{ $digest->money($payment->amount) }}
-@endforeach
-@endif
-
+@if ($digest->newCharges->count() > 1)
 <x-mail::panel>
-@if ($balance > 0)
-**{{ __('Łącznie do zapłaty: :amount', ['amount' => $digest->money($balance)]) }}**
-@if ($overdue > 0)
-
-{{ __('w tym po terminie: :amount', ['amount' => $digest->money($overdue)]) }}
-@endif
-@if ($next && $next->due_on)
-
-{{ __('Najbliższy termin: :date', ['date' => $next->due_on->format('d.m.Y')]) }}
-@endif
-@elseif ($balance < 0)
-**{{ __('Masz nadpłatę: :amount', ['amount' => $digest->money(-$balance)]) }}** – {{ __('zaliczymy ją na kolejne opłaty.') }}
-@else
-**{{ __('Wszystko opłacone – dziękujemy!') }}**
-@endif
+**{{ __('Razem nowe opłaty: :amount', ['amount' => $digest->money($digest->newChargesTotal())]) }}**
 </x-mail::panel>
 
-@if ($balance > 0 && $lease->bank_account)
+@endif
+@if ($lease->bank_account)
 **{{ __('Dane do przelewu') }}**<br>
 {{ __('Numer konta') }}: {{ \App\Support\BankAccount::format($lease->bank_account) }}<br>
 {{ __('Tytuł') }}: {{ $digest->transferTitle() }}

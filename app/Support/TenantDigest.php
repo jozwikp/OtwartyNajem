@@ -8,8 +8,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * What the tenant hasn't been told yet: new charges, changed amounts and received payments.
- * One digest per lease is e-mailed once a day.
+ * What the tenant hasn't been told yet: new charges and changed amounts – only what there is to pay.
+ * No balance, payments or overdue amounts: payments reach the app with the bank statement, often weeks
+ * late, so those figures could tell a tenant who has paid that they owe. One digest per lease a day.
  */
 class TenantDigest
 {
@@ -19,11 +20,6 @@ class TenantDigest
     /** @var Collection<int, LedgerEntry> */
     public Collection $changedCharges;
 
-    /** @var Collection<int, LedgerEntry> */
-    public Collection $payments;
-
-    public LeaseStatement $statement;
-
     public function __construct(public Lease $lease)
     {
         $lease->loadMissing(['tenants', 'apartment']);
@@ -32,8 +28,6 @@ class TenantDigest
 
         $this->newCharges = $entries->filter(fn (LedgerEntry $e) => $e->isCharge() && $e->notified_at === null)->values();
         $this->changedCharges = $entries->filter(fn (LedgerEntry $e) => $e->isCharge() && $e->notified_at !== null && $e->notified_amount !== $e->amount)->values();
-        $this->payments = $entries->filter(fn (LedgerEntry $e) => $e->isPayment() && $e->notified_at === null)->values();
-        $this->statement = new LeaseStatement($lease);
     }
 
     /**
@@ -51,11 +45,15 @@ class TenantDigest
 
     public function subject(): string
     {
-        $balance = $this->statement->balance();
+        return __(':label – nowe opłaty', ['label' => $this->lease->apartment->label]);
+    }
 
-        return $balance > 0
-            ? __(':label – do zapłaty :amount', ['label' => $this->lease->apartment->label, 'amount' => $this->money($balance)])
-            : __(':label – nowe opłaty', ['label' => $this->lease->apartment->label]);
+    /**
+     * Sum of the new charges – not the balance, which may miss payments not imported yet.
+     */
+    public function newChargesTotal(): int
+    {
+        return (int) $this->newCharges->sum('amount');
     }
 
     /**
@@ -75,7 +73,7 @@ class TenantDigest
     public function markAsSent(): void
     {
         $now = now();
-        $ids = collect([...$this->newCharges, ...$this->changedCharges, ...$this->payments])->pluck('id');
+        $ids = collect([...$this->newCharges, ...$this->changedCharges])->pluck('id');
 
         // Update in the database only, so this digest keeps showing what was sent.
         LedgerEntry::whereKey($ids)->update(['notified_at' => $now, 'notified_amount' => DB::raw('amount')]);
