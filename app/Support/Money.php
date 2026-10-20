@@ -10,6 +10,11 @@ use NumberFormatter;
 class Money
 {
     /**
+     * The largest amount a form accepts (99 999 999,99) – well within a 64-bit integer.
+     */
+    public const MAX = 9_999_999_999;
+
+    /**
      * Parse what people type ("2 500", "2500,50", "2.500,5") into minor units. Null when it's not a number.
      */
     public static function parse(?string $input): ?int
@@ -30,7 +35,8 @@ class Money
             return null;
         }
 
-        return (int) round(((float) $value) * 100);
+        // Casting a float beyond PHP_INT_MAX gives garbage, so cap it (the form rule rejects it anyway).
+        return (int) min(round(((float) $value) * 100), PHP_INT_MAX);
     }
 
     public static function format(int $amount, string $currency): string

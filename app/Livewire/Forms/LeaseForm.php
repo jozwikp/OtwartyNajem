@@ -121,8 +121,12 @@ class LeaseForm extends Form
     public static function moneyRule(): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail) {
-            if (Money::parse((string) $value) === null) {
+            $amount = Money::parse((string) $value);
+
+            if ($amount === null) {
                 $fail(__('Wpisz kwotę, np. 2500 albo 2500,50.'));
+            } elseif ($amount > Money::MAX) {
+                $fail(__('Ta kwota jest za duża.'));
             }
         };
     }

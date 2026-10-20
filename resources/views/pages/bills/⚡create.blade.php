@@ -110,6 +110,7 @@ new #[Title('Dodaj rachunek ręcznie')] class extends Component {
             'category.required' => __('Wybierz, za co jest ten rachunek.'),
             'periodTo.after_or_equal' => __('Koniec okresu nie może być przed jego początkiem.'),
         ], [
+            'supplier' => __('dostawca'), 'invoiceNumber' => __('numer faktury'),
             'totalAmount' => __('kwota'), 'periodFrom' => __('początek okresu'), 'periodTo' => __('koniec okresu'),
             'issuedOn' => __('data wystawienia'), 'dueOn' => __('termin płatności'), 'tenantAmount' => __('kwota dla najemcy'),
         ]);
@@ -247,8 +248,8 @@ new #[Title('Dodaj rachunek ręcznie')] class extends Component {
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <flux:input wire:model="supplier" :label="__('Dostawca')" :badge="__('Opcjonalnie')" :placeholder="__('np. Tauron, PGNiG')" />
-                        <flux:input wire:model="invoiceNumber" :label="__('Numer faktury')" :badge="__('Opcjonalnie')" />
+                        <flux:input wire:model="supplier" maxlength="100" :label="__('Dostawca')" :badge="__('Opcjonalnie')" :placeholder="__('np. Tauron, PGNiG')" />
+                        <flux:input wire:model="invoiceNumber" maxlength="100" :label="__('Numer faktury')" :badge="__('Opcjonalnie')" />
                     </div>
                 </div>
 

@@ -119,3 +119,20 @@ test('approved bills are grouped by month and paginated by 20', function () {
         ->assertSee('Styczeń 2026', false)
         ->assertDontSee('Dostawca 25');
 });
+
+test('too long texts and too large amounts get a readable error', function () {
+    Livewire::test('pages::bills.create', ['apartmentId' => (string) $this->apartment->id])
+        ->set('category', 'gas')
+        ->set('supplier', str_repeat('a', 101))
+        ->call('next')
+        ->assertHasErrors(['supplier' => 'max'])
+        ->assertSee('Pole dostawca nie może być dłuższe niż 100 znaków.')
+        ->assertSeeHtml('maxlength="100"')
+        ->set('supplier', 'PGNiG')
+        ->call('next')
+        ->set('totalAmount', '99999999999999999999')
+        ->call('next')
+        ->assertHasErrors('totalAmount')
+        ->assertSee('Ta kwota jest za duża.')
+        ->assertSet('step', 2);
+});

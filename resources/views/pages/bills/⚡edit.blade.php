@@ -73,7 +73,8 @@ new #[Title('Rachunek')] class extends Component {
             'apartmentId.required' => __('Wybierz mieszkanie.'),
             'periodTo.after_or_equal' => __('Koniec okresu nie może być przed jego początkiem.'),
         ], [
-            'category' => __('rodzaj'), 'issuedOn' => __('data wystawienia'), 'periodFrom' => __('początek okresu'),
+            'category' => __('rodzaj'), 'supplier' => __('dostawca'), 'invoiceNumber' => __('numer faktury'),
+            'issuedOn' => __('data wystawienia'), 'periodFrom' => __('początek okresu'),
             'periodTo' => __('koniec okresu'), 'dueOn' => __('termin płatności'),
             'totalAmount' => __('kwota faktury'), 'tenantAmount' => __('kwota dla najemcy'),
         ]);
@@ -172,8 +173,8 @@ new #[Title('Rachunek')] class extends Component {
                 </flux:select>
 
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <flux:input wire:model="supplier" :label="__('Dostawca')" />
-                    <flux:input wire:model="invoiceNumber" :label="__('Numer faktury')" />
+                    <flux:input wire:model="supplier" maxlength="100" :label="__('Dostawca')" />
+                    <flux:input wire:model="invoiceNumber" maxlength="100" :label="__('Numer faktury')" />
                     <flux:input type="date" wire:model="periodFrom" :label="__('Okres od')" />
                     <flux:input type="date" wire:model="periodTo" :label="__('Okres do')" />
                     <flux:input type="date" wire:model="issuedOn" :label="__('Data wystawienia')" />
