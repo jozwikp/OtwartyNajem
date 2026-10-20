@@ -116,6 +116,64 @@ test('rent can be raised from a future month', function () {
     expect($rent->rates()->count())->toBe(2);
 });
 
+test('a new amount keeps its own note with the month it starts from', function () {
+    $lease = makeLease();
+    $rent = $lease->recurringCharges->first();
+
+    Livewire::test('pages::leases.show', ['apartment' => $this->apartment, 'lease' => $lease])
+        ->call('openChangeAmount', $rent->id)
+        ->set('amount', '2700')
+        ->set('rateNotes', 'Waloryzacja o inflację')
+        ->call('changeAmount')
+        ->assertHasNoErrors()
+        ->assertSee('Waloryzacja o inflację');
+
+    $rates = $rent->rates()->get();
+
+    expect($rates->first()->notes)->toBeNull()
+        ->and($rates->last()->notes)->toBe('Waloryzacja o inflację')
+        ->and($rates->last()->valid_from->toDateString())->toBe('2026-10-01');
+});
+
+test('a note can be added to the current amount of a charge', function () {
+    $lease = makeLease();
+    $rate = $lease->recurringCharges->first()->rates->first();
+
+    Livewire::test('pages::leases.show', ['apartment' => $this->apartment, 'lease' => $lease])
+        ->call('openRateNote', $rate->id)
+        ->assertSet('rateNotes', '')
+        ->set('rateNotes', 'Uchwała wspólnoty nr 3/2026')
+        ->call('saveRateNote')
+        ->assertHasNoErrors()
+        ->assertSee('od 1 września 2026: Uchwała wspólnoty nr 3/2026');
+
+    expect($rate->fresh()->notes)->toBe('Uchwała wspólnoty nr 3/2026');
+
+    $this->get(route('apartments.history', $this->apartment))
+        ->assertOk()
+        ->assertSee('Opłata za mieszkanie: zmieniono notatkę do kwoty od 1 września 2026');
+});
+
+test('notes of another lease\'s charges cannot be changed', function () {
+    $lease = makeLease();
+    $other = app(CreateLease::class)->handle(
+        Apartment::factory()->create(),
+        User::factory()->create(),
+        ['starts_on' => '2026-09-01', 'ends_on' => null, 'currency' => 'PLN', 'payment_due_day' => 10],
+        [['first_name' => 'Ewa', 'last_name' => 'Nowak']],
+        [['type' => ChargeType::Rent, 'name' => null, 'amount' => 100000]],
+    );
+    $foreignRate = $other->recurringCharges->first()->rates->first();
+
+    Livewire::test('pages::leases.show', ['apartment' => $this->apartment, 'lease' => $lease])
+        ->set('rateId', $foreignRate->id)
+        ->set('rateNotes', 'x')
+        ->call('saveRateNote')
+        ->assertNotFound();
+
+    expect($foreignRate->fresh()->notes)->toBeNull();
+});
+
 test('a lease can be ended and the deposit returned partially with a note', function () {
     $lease = makeLease();
 

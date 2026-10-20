@@ -21,7 +21,7 @@ class ChangeChargeAmount
         return $charge->earliestChangeMonth()->max($charge->lease->starts_on->startOfMonth());
     }
 
-    public function handle(RecurringCharge $charge, User $user, int $amount, CarbonImmutable $validFrom): void
+    public function handle(RecurringCharge $charge, User $user, int $amount, CarbonImmutable $validFrom, ?string $notes = null): void
     {
         $validFrom = $validFrom->startOfMonth();
         $earliest = static::earliestMonth($charge);
@@ -34,10 +34,10 @@ class ChangeChargeAmount
             ]);
         }
 
-        DB::transaction(function () use ($charge, $user, $amount, $validFrom) {
+        DB::transaction(function () use ($charge, $user, $amount, $validFrom, $notes) {
             $charge->rates()->updateOrCreate(
                 ['valid_from' => $validFrom],
-                ['amount' => $amount, 'created_by' => $user->id],
+                ['amount' => $amount, 'notes' => filled($notes) ? trim($notes) : null, 'created_by' => $user->id],
             );
 
             $this->accrue->handle($charge->lease);

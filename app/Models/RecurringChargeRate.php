@@ -14,9 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $recurring_charge_id
  * @property int $amount
  * @property CarbonImmutable $valid_from
+ * @property string|null $notes
  * @property-read RecurringCharge $charge
  */
-#[Fillable(['amount', 'valid_from', 'created_by'])]
+#[Fillable(['amount', 'valid_from', 'notes', 'created_by'])]
 class RecurringChargeRate extends Model implements BelongsToApartment
 {
     use AuditsApartment;
@@ -26,6 +27,7 @@ class RecurringChargeRate extends Model implements BelongsToApartment
         return [
             'amount' => 'integer',
             'valid_from' => 'immutable_date',
+            'notes' => 'encrypted',
         ];
     }
 
@@ -41,7 +43,7 @@ class RecurringChargeRate extends Model implements BelongsToApartment
 
     protected function auditedAttributes(): array
     {
-        return ['amount', 'valid_from'];
+        return ['amount', 'valid_from', 'notes'];
     }
 
     /**

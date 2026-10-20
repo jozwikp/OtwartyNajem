@@ -22,7 +22,7 @@ class AddRecurringCharge
         return CarbonImmutable::today()->startOfMonth()->max($lease->starts_on->startOfMonth());
     }
 
-    public function handle(Lease $lease, User $user, ChargeType $type, ?string $name, int $amount, CarbonImmutable $validFrom): RecurringCharge
+    public function handle(Lease $lease, User $user, ChargeType $type, ?string $name, int $amount, CarbonImmutable $validFrom, ?string $notes = null): RecurringCharge
     {
         $validFrom = $validFrom->startOfMonth();
 
@@ -32,13 +32,18 @@ class AddRecurringCharge
             ]);
         }
 
-        return DB::transaction(function () use ($lease, $user, $type, $name, $amount, $validFrom) {
+        return DB::transaction(function () use ($lease, $user, $type, $name, $amount, $validFrom, $notes) {
             $charge = $lease->recurringCharges()->create([
                 'type' => $type,
                 'name' => $type === ChargeType::Other ? $name : null,
             ]);
 
-            $charge->rates()->create(['amount' => $amount, 'valid_from' => $validFrom, 'created_by' => $user->id]);
+            $charge->rates()->create([
+                'amount' => $amount,
+                'valid_from' => $validFrom,
+                'notes' => filled($notes) ? trim($notes) : null,
+                'created_by' => $user->id,
+            ]);
 
             $this->accrue->handle($lease);
 

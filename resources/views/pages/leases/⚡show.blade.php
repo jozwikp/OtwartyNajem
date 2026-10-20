@@ -11,6 +11,7 @@ use App\Models\Apartment;
 use App\Models\Lease;
 use App\Models\LeaseTenant;
 use App\Models\RecurringCharge;
+use App\Models\RecurringChargeRate;
 use App\Support\LeaseStatement;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -42,6 +43,8 @@ new #[Title('Najem')] class extends Component {
     public string $chargeName = '';
     public string $amount = '';
     public string $validFrom = '';
+    public string $rateNotes = '';
+    public ?int $rateId = null;
 
     // End lease / deposit return
     public string $endsOn = '';
@@ -207,6 +210,7 @@ new #[Title('Najem')] class extends Component {
 
         $this->chargeId = $charge->id;
         $this->amount = '';
+        $this->rateNotes = '';
         $this->validFrom = ChangeChargeAmount::earliestMonth($charge)->toDateString();
 
         Flux::modal('change-amount')->show();
@@ -219,10 +223,11 @@ new #[Title('Najem')] class extends Component {
         $this->validate([
             'amount' => ['required', LeaseForm::moneyRule()],
             'validFrom' => ['required', 'date'],
-        ], attributes: ['amount' => __('nowa kwota'), 'validFrom' => __('od kiedy')]);
+            'rateNotes' => ['nullable', 'string', 'max:1000'],
+        ], attributes: ['amount' => __('nowa kwota'), 'validFrom' => __('od kiedy'), 'rateNotes' => __('notatka')]);
 
         $charge = $this->lease->recurringCharges()->findOrFail($this->chargeId);
-        $changeChargeAmount->handle($charge, Auth::user(), Money::parse($this->amount), CarbonImmutable::parse($this->validFrom));
+        $changeChargeAmount->handle($charge, Auth::user(), Money::parse($this->amount), CarbonImmutable::parse($this->validFrom), $this->rateNotes);
 
         Flux::modal('change-amount')->close();
         Flux::toast(variant: 'success', text: __('Nowa kwota zapisana.'));
@@ -235,6 +240,7 @@ new #[Title('Najem')] class extends Component {
         $this->chargeType = $this->lease->recurringCharges->contains('type', ChargeType::Rent) ? 'other' : 'rent';
         $this->chargeName = '';
         $this->amount = '';
+        $this->rateNotes = '';
         $this->validFrom = AddRecurringCharge::earliestMonth($this->lease)->toDateString();
 
         Flux::modal('add-charge')->show();
@@ -249,13 +255,44 @@ new #[Title('Najem')] class extends Component {
             'chargeName' => $this->chargeType === 'other' ? ['required', 'string', 'max:100'] : ['nullable'],
             'amount' => ['required', LeaseForm::moneyRule()],
             'validFrom' => ['required', 'date'],
-        ], attributes: ['chargeName' => __('nazwa opłaty'), 'amount' => __('kwota'), 'validFrom' => __('od kiedy')]);
+            'rateNotes' => ['nullable', 'string', 'max:1000'],
+        ], attributes: ['chargeName' => __('nazwa opłaty'), 'amount' => __('kwota'), 'validFrom' => __('od kiedy'), 'rateNotes' => __('notatka')]);
 
-        $addRecurringCharge->handle($this->lease, Auth::user(), ChargeType::from($this->chargeType), trim($this->chargeName), Money::parse($this->amount), CarbonImmutable::parse($this->validFrom));
+        $addRecurringCharge->handle($this->lease, Auth::user(), ChargeType::from($this->chargeType), trim($this->chargeName), Money::parse($this->amount), CarbonImmutable::parse($this->validFrom), $this->rateNotes);
 
         Flux::modal('add-charge')->close();
         Flux::toast(variant: 'success', text: __('Opłata dodana.'));
         unset($this->lease, $this->statement);
+    }
+
+    /**
+     * The note explains where a given amount comes from, so it belongs to that amount (and its start month).
+     */
+    public function openRateNote(int $rateId): void
+    {
+        $this->resetValidation();
+        $rate = $this->lease->recurringCharges->flatMap->rates->firstWhere('id', $rateId);
+
+        $this->rateId = $rate->id;
+        $this->rateNotes = (string) $rate->notes;
+
+        Flux::modal('rate-note')->show();
+    }
+
+    public function saveRateNote(): void
+    {
+        $this->authorize('update', $this->apartment);
+
+        $this->validate(['rateNotes' => ['nullable', 'string', 'max:1000']], attributes: ['rateNotes' => __('notatka')]);
+
+        $rate = RecurringChargeRate::query()
+            ->whereIn('recurring_charge_id', $this->lease->recurringCharges()->select('id'))
+            ->findOrFail($this->rateId);
+        $rate->update(['notes' => filled($this->rateNotes) ? trim($this->rateNotes) : null]);
+
+        Flux::modal('rate-note')->close();
+        Flux::toast(variant: 'success', text: __('Notatka zapisana.'));
+        unset($this->lease);
     }
 
     // --- End of lease and deposit ---------------------------------------------------
@@ -487,12 +524,28 @@ new #[Title('Najem')] class extends Component {
                                 <li class="flex flex-wrap items-center gap-4 py-3" wire:key="charge-{{ $charge->id }}">
                                     <div class="min-w-0 flex-1">
                                         <div class="font-medium">{{ $charge->label }}</div>
+                                        @if ($current)
+                                            <div class="mt-0.5 flex items-start gap-1" wire:key="rate-{{ $current->id }}">
+                                                @if ($current->notes)
+                                                    <flux:text class="text-sm whitespace-pre-line">{{ __('od :date: :notes', ['date' => $current->valid_from->translatedFormat('j F Y'), 'notes' => $current->notes]) }}</flux:text>
+                                                @endif
+                                                <flux:button size="xs" variant="subtle" :icon="$current->notes ? 'pencil-square' : 'chat-bubble-bottom-center-text'" wire:click="openRateNote({{ $current->id }})" :tooltip="$current->notes ? __('Edytuj notatkę') : __('Dodaj notatkę')" :aria-label="$current->notes ? __('Edytuj notatkę') : __('Dodaj notatkę')" />
+                                            </div>
+                                        @endif
                                         @foreach ($upcoming as $rate)
-                                            <flux:text class="text-sm">
-                                                {{ $rate->amount === 0
-                                                    ? __('od :date przestaje być naliczana', ['date' => $rate->valid_from->translatedFormat('j F Y')])
-                                                    : __('od :date: :amount', ['date' => $rate->valid_from->translatedFormat('j F Y'), 'amount' => $fmt($rate->amount)]) }}
-                                            </flux:text>
+                                            <div class="mt-0.5 flex items-start gap-1" wire:key="rate-{{ $rate->id }}">
+                                                <div>
+                                                    <flux:text class="text-sm">
+                                                        {{ $rate->amount === 0
+                                                            ? __('od :date przestaje być naliczana', ['date' => $rate->valid_from->translatedFormat('j F Y')])
+                                                            : __('od :date: :amount', ['date' => $rate->valid_from->translatedFormat('j F Y'), 'amount' => $fmt($rate->amount)]) }}
+                                                    </flux:text>
+                                                    @if ($rate->notes)
+                                                        <flux:text class="text-sm whitespace-pre-line">{{ $rate->notes }}</flux:text>
+                                                    @endif
+                                                </div>
+                                                <flux:button size="xs" variant="subtle" :icon="$rate->notes ? 'pencil-square' : 'chat-bubble-bottom-center-text'" wire:click="openRateNote({{ $rate->id }})" :tooltip="$rate->notes ? __('Edytuj notatkę') : __('Dodaj notatkę')" :aria-label="$rate->notes ? __('Edytuj notatkę') : __('Dodaj notatkę')" />
+                                            </div>
                                         @endforeach
                                     </div>
                                     <div class="text-right">
@@ -663,6 +716,7 @@ new #[Title('Najem')] class extends Component {
                                 <flux:select.option :value="$value">{{ $label }}</flux:select.option>
                             @endforeach
                         </flux:select>
+                        <flux:textarea wire:model="rateNotes" :label="__('Notatka (opcjonalnie)')" :placeholder="__('np. uchwała wspólnoty nr 5/2026 – wyższy fundusz remontowy')" rows="3" />
                         <div class="flex justify-end gap-2">
                             <flux:modal.close><flux:button variant="ghost">{{ __('Anuluj') }}</flux:button></flux:modal.close>
                             <flux:button type="submit" variant="primary">{{ __('Zapisz nową kwotę') }}</flux:button>
@@ -688,11 +742,32 @@ new #[Title('Najem')] class extends Component {
                             <flux:select.option :value="$value">{{ $label }}</flux:select.option>
                         @endforeach
                     </flux:select>
+                    <flux:textarea wire:model="rateNotes" :label="__('Notatka (opcjonalnie)')" :placeholder="__('np. z czego wynika ta kwota')" rows="3" />
                     <div class="flex justify-end gap-2">
                         <flux:modal.close><flux:button variant="ghost">{{ __('Anuluj') }}</flux:button></flux:modal.close>
                         <flux:button type="submit" variant="primary">{{ __('Dodaj opłatę') }}</flux:button>
                     </div>
                 </form>
+            </flux:modal>
+
+            <flux:modal name="rate-note" class="w-full max-w-md">
+                @if ($rateId && ($rate = $lease->recurringCharges->flatMap->rates->firstWhere('id', $rateId)))
+                    <form wire:submit="saveRateNote" class="space-y-6">
+                        <div>
+                            <flux:heading size="lg">{{ __('Notatka: :name', ['name' => $lease->recurringCharges->firstWhere('id', $rate->recurring_charge_id)->label]) }}</flux:heading>
+                            <flux:text class="mt-2">
+                                {{ $rate->amount === 0
+                                    ? __('Dotyczy zakończenia naliczania od :date.', ['date' => $rate->valid_from->translatedFormat('j F Y')])
+                                    : __('Dotyczy kwoty :amount obowiązującej od :date.', ['amount' => $fmt($rate->amount), 'date' => $rate->valid_from->translatedFormat('j F Y')]) }}
+                            </flux:text>
+                        </div>
+                        <flux:textarea wire:model="rateNotes" :label="__('Notatka')" :placeholder="__('np. z czego wynika ta kwota')" rows="4" autofocus />
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close><flux:button variant="ghost">{{ __('Anuluj') }}</flux:button></flux:modal.close>
+                            <flux:button type="submit" variant="primary">{{ __('Zapisz notatkę') }}</flux:button>
+                        </div>
+                    </form>
+                @endif
             </flux:modal>
 
             <flux:modal name="end-lease" class="w-full max-w-md">

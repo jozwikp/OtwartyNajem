@@ -199,7 +199,7 @@ class ActivityPresenter
             'leases' => Lease::attributeLabels(),
             'bills' => Bill::attributeLabels(),
             'lease_tenants' => ['first_name' => __('Imię'), 'last_name' => __('Nazwisko'), 'email' => __('E-mail'), 'phone' => __('Telefon'), 'is_primary' => __('Główny kontakt')],
-            'recurring_charge_rates' => ['amount' => __('Kwota'), 'valid_from' => __('Od miesiąca')],
+            'recurring_charge_rates' => ['amount' => __('Kwota'), 'valid_from' => __('Od miesiąca'), 'notes' => __('Notatka')],
             'ledger_entries' => ['amount' => __('Kwota'), 'booked_on' => __('Data'), 'due_on' => __('Termin'), 'notes' => __('Notatka'), 'payment_method' => __('Sposób')],
             default => ['name' => __('Imię i nazwisko'), 'email' => __('E-mail')],
         };
@@ -268,6 +268,15 @@ class ActivityPresenter
         $name = $subject instanceof RecurringChargeRate ? $subject->charge->label : null;
         $amount = (int) $this->attribute('amount');
         $month = $this->attribute('valid_from') ? $this->date($this->attribute('valid_from'))->isoFormat('D MMMM YYYY') : '';
+        $changed = array_keys($this->activity->attribute_changes?->get('attributes', []) ?? []);
+
+        // Only the note changed: the logged changes don't say which amount it belongs to.
+        if ($this->activity->event === 'updated' && $changed === ['notes']) {
+            return __(':name: zmieniono notatkę do kwoty od :month', [
+                'name' => $name ?? __('Opłata'),
+                'month' => $subject instanceof RecurringChargeRate ? $subject->valid_from->isoFormat('D MMMM YYYY') : '—',
+            ]);
+        }
 
         return $amount === 0
             ? __(':name: bez opłaty od :month', ['name' => $name ?? __('Opłata'), 'month' => $month])
