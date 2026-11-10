@@ -34,6 +34,10 @@
                 <flux:sidebar.item icon="receipt-percent" :href="route('bills.index')" :current="request()->routeIs('bills.*')" :badge="$billsToReview ?: null" badge:color="amber" wire:navigate>
                     {{ __('Rachunki') }}
                 </flux:sidebar.item>
+
+                <flux:sidebar.item icon="chart-bar" :href="route('reports.index')" :current="request()->routeIs('reports.*')" wire:navigate>
+                    {{ __('Raporty') }}
+                </flux:sidebar.item>
             </flux:sidebar.nav>
 
             <flux:sidebar.group :heading="__('Moje mieszkania')" class="grid">

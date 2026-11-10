@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('wplaty', 'pages::payments.index')->name('payments.index');
     Route::livewire('rachunki', 'pages::bills.index')->name('bills.index');
     Route::livewire('rachunki/dodaj', 'pages::bills.create')->name('bills.create');
+    Route::livewire('raporty', 'pages::reports.index')->name('reports.index');
     Route::livewire('rachunki/{bill}', 'pages::bills.edit')->middleware('can:update,bill')->name('bills.edit');
     Route::get('rachunki/{bill}/plik', function (Bill $bill) {
         abort_unless($bill->hasFile(), 404);
