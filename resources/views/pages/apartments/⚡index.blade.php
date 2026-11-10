@@ -1,6 +1,9 @@
 <?php
 
+use App\Enums\LeaseStatus;
+use App\Enums\LedgerKind;
 use App\Models\Apartment;
+use App\Models\Lease;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -19,7 +22,7 @@ new #[Title('Moje mieszkania')] class extends Component {
     public function apartments(): Collection
     {
         return Apartment::ownedBy(Auth::user())
-            ->with('owners')
+            ->with(['owners', 'leases.ledgerEntries'])
             ->when($this->search !== '', function ($query) {
                 $term = '%'.$this->search.'%';
                 $query->where(fn ($q) => $q
@@ -36,6 +39,22 @@ new #[Title('Moje mieszkania')] class extends Component {
     public function total(): int
     {
         return Apartment::ownedBy(Auth::user())->count();
+    }
+
+    /**
+     * The lease currently in progress, if any (leases and their ledger entries must be eager loaded).
+     */
+    public function activeLeaseOf(Apartment $apartment): ?Lease
+    {
+        return $apartment->leases->first(fn (Lease $lease) => $lease->status() === LeaseStatus::Active);
+    }
+
+    /**
+     * Charges minus payments for the lease, computed from its eager-loaded ledger entries (no extra query).
+     */
+    public function balanceOf(Lease $lease): int
+    {
+        return (int) $lease->ledgerEntries->sum(fn ($entry) => $entry->kind === LedgerKind::Charge ? $entry->amount : -$entry->amount);
     }
 }; ?>
 
@@ -94,6 +113,20 @@ new #[Title('Moje mieszkania')] class extends Component {
                     </div>
 
                     <flux:heading size="lg" class="group-hover:underline">{{ $apartment->label }}</flux:heading>
+
+                    @php $activeLease = $this->activeLeaseOf($apartment); @endphp
+                    @if ($activeLease)
+                        @php $balance = $this->balanceOf($activeLease); @endphp
+                        <flux:text class="mt-1 text-sm {{ $balance > 0 ? 'text-red-600 dark:text-red-400' : ($balance < 0 ? 'text-accent-content' : '') }}">
+                            @if ($balance > 0)
+                                {{ __('Do zapłaty: :amount', ['amount' => \App\Support\Money::format($balance, $activeLease->currency)]) }}
+                            @elseif ($balance < 0)
+                                {{ __('Nadpłata: :amount', ['amount' => \App\Support\Money::format(-$balance, $activeLease->currency)]) }}
+                            @else
+                                {{ __('Rozliczone') }}
+                            @endif
+                        </flux:text>
+                    @endif
 
                     <div class="mt-auto flex items-center justify-between pt-4">
                         <flux:badge size="sm">{{ $apartment->area_formatted }}</flux:badge>

@@ -1,6 +1,11 @@
 <?php
 
+use App\Enums\ChargeType;
+use App\Enums\LeaseStatus;
 use App\Models\Apartment;
+use App\Models\Lease;
+use App\Support\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -22,6 +27,35 @@ new #[Title('Pulpit')] class extends Component {
         $area = (float) Apartment::ownedBy(Auth::user())->sum('area');
 
         return Number::format($area, maxPrecision: 2, locale: app()->getLocale()).' m²';
+    }
+
+    /**
+     * Sum of the current rent (not admin/community fees, not bills) across all active leases, by currency.
+     */
+    #[Computed]
+    public function monthlyRent(): string
+    {
+        $today = CarbonImmutable::today();
+
+        $totals = Lease::query()
+            ->whereHas('apartment', fn ($query) => $query->ownedBy(Auth::user()))
+            ->with('recurringCharges.rates')
+            ->get()
+            ->filter(fn (Lease $lease) => $lease->status($today) === LeaseStatus::Active)
+            ->reduce(function (array $totals, Lease $lease) use ($today) {
+                $rent = $lease->recurringCharges->firstWhere('type', ChargeType::Rent);
+                $totals[$lease->currency] = ($totals[$lease->currency] ?? 0) + ($rent?->rateFor($today)?->amount ?? 0);
+
+                return $totals;
+            }, []);
+
+        if ($totals === []) {
+            return Money::format(0, 'PLN');
+        }
+
+        return collect($totals)
+            ->map(fn (int $amount, string $currency) => Money::format($amount, $currency))
+            ->implode(' + ');
     }
 
     #[Computed]
@@ -70,7 +104,7 @@ new #[Title('Pulpit')] class extends Component {
             </flux:button>
         </div>
     @else
-        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <a href="{{ route('apartments.index') }}" wire:navigate class="rounded-2xl border border-line bg-card p-5 transition hover:border-accent/40 hover:shadow-md">
                 <flux:text>{{ __('Mieszkania') }}</flux:text>
                 <div class="mt-1 text-3xl font-semibold">{{ $this->apartmentsCount }}</div>
@@ -78,6 +112,10 @@ new #[Title('Pulpit')] class extends Component {
             <div class="rounded-2xl border border-line bg-card p-5">
                 <flux:text>{{ __('Łączny metraż') }}</flux:text>
                 <div class="mt-1 text-3xl font-semibold">{{ $this->totalArea }}</div>
+            </div>
+            <div class="rounded-2xl border border-line bg-card p-5">
+                <flux:text>{{ __('Czynsze z aktywnych umów') }}</flux:text>
+                <div class="mt-1 text-3xl font-semibold">{{ $this->monthlyRent }}</div>
             </div>
             <a href="{{ route('apartments.create') }}" wire:navigate class="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-stone-300 p-5 font-medium text-accent-content transition hover:border-accent hover:bg-card dark:border-stone-700">
                 <flux:icon.plus variant="mini" />

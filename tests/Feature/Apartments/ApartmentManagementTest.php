@@ -1,8 +1,14 @@
 <?php
 
+use App\Actions\Leases\CreateLease;
+use App\Actions\Leases\RecordPayment;
+use App\Enums\ChargeType;
+use App\Enums\PaymentMethod;
 use App\Models\Activity;
 use App\Models\Apartment;
 use App\Models\User;
+use App\Support\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -163,4 +169,33 @@ test('the sidebar lists the user\'s apartments', function () {
         ->assertOk()
         ->assertSee('Kawalerka Mokotów')
         ->assertDontSee('Cudze M3');
+});
+
+test('the apartments list shows the current settlement balance of the active lease', function () {
+    test()->travelTo(CarbonImmutable::parse('2026-09-24'));
+
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $apartment = Apartment::factory()->ownedBy($user)->create(['label' => 'Kawalerka Mokotów']);
+    $lease = app(CreateLease::class)->handle(
+        $apartment,
+        $user,
+        ['starts_on' => '2026-09-01', 'ends_on' => null, 'currency' => 'PLN', 'payment_due_day' => 10],
+        [['first_name' => 'Jan', 'last_name' => 'Kowalski', 'email' => 'jan@example.com', 'phone' => null]],
+        [['type' => ChargeType::Rent, 'name' => null, 'amount' => 250000]],
+    );
+
+    app(RecordPayment::class)->handle(
+        $lease, $user, 100000, CarbonImmutable::parse('2026-09-24'), PaymentMethod::Transfer,
+    );
+
+    // Charged 2500 zł, paid 1000 zł -> 1500 zł still owed.
+    $this->get(route('apartments.index'))
+        ->assertOk()
+        ->assertSee(Money::format(150000, 'PLN'));
+
+    // An apartment without a lease must not error out.
+    Apartment::factory()->ownedBy($user)->create(['label' => 'Bez najmu']);
+    $this->get(route('apartments.index'))->assertOk()->assertSee('Bez najmu');
 });
